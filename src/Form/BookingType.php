@@ -18,6 +18,7 @@ class BookingType extends ApplicationType
     {
         $this->transformer = $transformer;
     }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
@@ -55,6 +56,10 @@ class BookingType extends ApplicationType
     {
         $resolver->setDefaults([
             'data_class' => Booking::class,
+            'validation_groups' => [
+                'Default',
+                'front'
+            ]
         ]);
     }
 }

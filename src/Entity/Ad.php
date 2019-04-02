@@ -82,10 +82,16 @@ class Ad
      */
     private $bookings;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Comment", mappedBy="ad", orphanRemoval=true)
+     */
+    private $comments;
+
     public function __construct()
     {
         $this->images = new ArrayCollection();
         $this->bookings = new ArrayCollection();
+        $this->comments = new ArrayCollection();
     }
 
     /**
@@ -105,6 +111,39 @@ class Ad
     }
 
     /**
+     * Permet de récuperer le commentaire d'un auteur par rapport à une annonce
+     *
+     * @param User $author
+     * @return mixed|null
+     */
+    public function getCommentFromAuthor(User $author)
+    {
+        foreach ($this->comments as $comment) {
+            if ($comment->getAuthor() === $author) return $comment;
+        }
+
+        return null;
+    }
+
+    /**
+     * Permet d'obtenir lam oyenne globale des notes pour cette annonce
+     *
+     * @return float|int
+     */
+    public function getAvgRatings()
+    {
+        // Calculer la somme des notations
+        $sum = array_reduce($this->comments->toArray(), function ($total, $comment) {
+            return $total + $comment->getRating();
+        }, 0);
+
+        // Faire la division pour avoir la moyenne
+        if (count($this->comments) > 0) return $sum / count($this->comments);
+
+        return 0;
+    }
+
+    /**
      * Permet d'obtenir un tableau des jours qui ne sont pas disponibles pour cette annonce
      *
      * @return array Untableau d'objets DateTime representant les jours d'oocupation
@@ -118,10 +157,10 @@ class Ad
             $resultat = range(
                 $booking->getStartDate()->getTimeStamp(),
                 $booking->getEndDate()->getTimestamp(),
-                24 *60 *60
+                24 * 60 * 60
             );
 
-            $days= array_map(function($dayTimestamp){
+            $days = array_map(function ($dayTimestamp) {
                 return new \DateTime(date('Y-m-d', $dayTimestamp));
             }, $resultat);
 
@@ -288,6 +327,37 @@ class Ad
             // set the owning side to null (unless already changed)
             if ($booking->getAd() === $this) {
                 $booking->setAd(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Comment[]
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): self
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments[] = $comment;
+            $comment->setAd($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): self
+    {
+        if ($this->comments->contains($comment)) {
+            $this->comments->removeElement($comment);
+            // set the owning side to null (unless already changed)
+            if ($comment->getAd() === $this) {
+                $comment->setAd(null);
             }
         }
 

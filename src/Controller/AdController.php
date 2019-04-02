@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Ad;
-use App\Form\AnnonceType;
+use App\Form\AdType;
 use App\Repository\AdRepository;
 use Doctrine\Common\Persistence\ObjectManager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -44,7 +44,7 @@ class AdController extends AbstractController
     {
         $ad = new Ad();
 
-        $form = $this->createForm(AnnonceType::class, $ad);
+        $form = $this->createForm(AdType::class, $ad);
 
         $form->handleRequest($request);
 
@@ -84,7 +84,7 @@ class AdController extends AbstractController
      */
     public function edit(Ad $ad, Request $request, ObjectManager $manager)
     {
-        $form = $this->createForm(AnnonceType::class, $ad);
+        $form = $this->createForm(AdType::class, $ad);
 
         $form->handleRequest($request);
 

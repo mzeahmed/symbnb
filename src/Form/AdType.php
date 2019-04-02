@@ -12,7 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class AnnonceType extends ApplicationType
+class AdType extends ApplicationType
 {
 
     public function buildForm(FormBuilderInterface $builder, array $options)

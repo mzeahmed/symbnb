@@ -57,6 +57,7 @@ class AccountController extends AbstractController
      *
      * @param Request $request
      * @param ObjectManager $manager
+     * @param UserPasswordEncoderInterface $encoder
      * @return Response
      */
     public function register(Request $request, ObjectManager $manager, UserPasswordEncoderInterface $encoder)
