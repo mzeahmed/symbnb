@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Booking;
 use App\Form\AdminBookingType;
-use App\Repository\BookingRepository;
+use App\Service\PaginationService;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class AdminBookingController extends AbstractController
@@ -15,15 +17,19 @@ class AdminBookingController extends AbstractController
     /**
      * Permet d'afficher les reservations
      *
-     * @Route("/admin/bookings", name="admin_booking_index")
+     * @Route("/admin/bookings/{page<\d+>?1}", name="admin_booking_index")
      *
-     * @param BookingRepository $repo
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param $page
+     * @param PaginationService $pagination
+     * @return Response
      */
-    public function index(BookingRepository $repo)
+    public function index($page, PaginationService $pagination)
     {
+        $pagination->setEntityClass(Booking::class);
+        $pagination->setPage($page);
+
         return $this->render('admin/booking/index.html.twig', [
-            'bookings' => $repo->findAll()
+            'pagination' => $pagination
         ]);
     }
 
@@ -35,7 +41,7 @@ class AdminBookingController extends AbstractController
      * @param Booking $booking
      * @param Request $request
      * @param ObjectManager $manager
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function edit(Booking $booking, Request $request, ObjectManager $manager)
     {
@@ -67,7 +73,7 @@ class AdminBookingController extends AbstractController
      *
      * @param Booking $booking
      * @param ObjectManager $manager
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
     public function delete(Booking $booking, ObjectManager $manager)
     {
