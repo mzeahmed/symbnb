@@ -54,6 +54,8 @@
 
 {% block javascripts %}
 
-    <script src="{{ asset('build/ad.JS') }}"></script>
+    <script src="{{ asset('build/ad.js') }}"></script>
+    {#gestion du probleme de chargement des packages via webpack#}
+    {{ encore_entry_script_tags('ad') }}
 
 {% endblock %}

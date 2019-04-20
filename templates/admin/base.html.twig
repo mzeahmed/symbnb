@@ -6,12 +6,13 @@
 
         <meta name="viewport" content="width=device-width, user-scalable=no" >
 
-        <link rel="stylesheet" href="/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
               integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
               crossorigin="anonymous">
 
-        <link rel="stylesheet" href="/css/app.css">
+        <link rel="stylesheet" href="{{ asset('build/app.css') }}">
+        {#gestion du probleme de chargement des packages via webpack#}
+        {{ encore_entry_link_tags('app') }}
 
         {% block stylesheets %}{% endblock %}
     </head>
@@ -22,9 +23,9 @@
 
         {% include 'admin/partials/footer.html.twig' %}
 
-        <script src="/js/jquery.min.js"></script>
-        <script src="/js/popper.min.js"></script>
-        <script src="/js/bootstrap.min.js"></script>
+        <script src="{{ asset('build/app.js') }}"></script>
+        {#gestion du probleme de chargement des packages via webpack#}
+        {{ encore_entry_script_tags('app') }}
         {% block javascripts %}{% endblock %}
     </body>
 </html>

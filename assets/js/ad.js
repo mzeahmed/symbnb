@@ -3,10 +3,10 @@ $('#add-image').click(function () {
     const index = +$('#widgets-counter').val();
 
     // Je récupère le prototype des entrées
-    const tmpl = $('#annonce_images').data('prototype').replace(/__name__/g, index);
+    const tmpl = $('#ad_images').data('prototype').replace(/__name__/g, index);
 
     // J'injecte ce code au sein de la div
-    $('#annonce_images').append(tmpl);
+    $('#ad_images').append(tmpl);
 
     $('#widgets-counter').val(index + 1);
 
@@ -22,7 +22,7 @@ function handleDeleteButtons() {
 }
 
 function updateCounter() {
-    const count = +$('#annonce_images div.form-group').length;
+    const count = +$('#ad_images div.form-group').length;
 
     $('#widgets-counter').val(count);
 }

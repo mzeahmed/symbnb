@@ -1,7 +1,6 @@
-@import "bootstrap.min.css";
-//@import "~bootswatch/dist/materia/bootstrap.css";
+@import "~bootswatch/dist/materia/bootstrap.css";
 
-div.container {
+div.container, div.container-fluid {
     margin-top: 20px;
 }
 
