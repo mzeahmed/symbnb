@@ -5,15 +5,18 @@ namespace App\Controller;
 use App\Service\StatsService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response;
+
 
 class AdminDashbordController extends AbstractController
 {
     /**
      * @Route("/admin", name="admin_dashbord")
      * @param StatsService $statsService
-     * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @return Response
      */
-    public function index(StatsService $statsService)
+    public function index(StatsService $statsService): Response
     {
         $stats = $statsService->getStats();
 
@@ -24,7 +27,7 @@ class AdminDashbordController extends AbstractController
         return $this->render('admin/dashbord/index.html.twig', [
             'stats' => $stats,
             'bestAds' => $bestAds,
-            'worstAds' => $worstAds
+            'worstAds' => $worstAds,
         ]);
     }
 }

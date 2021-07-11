@@ -9,7 +9,7 @@ use App\Entity\Image;
 use App\Entity\Role;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
@@ -31,18 +31,20 @@ class AppFixtures extends Fixture
         $manager->persist($adminRole);
 
         $adminUser = new User;
+
         $adminUser->setFirstName('Ahmed')
             ->setLastName('Mze')
             ->setEmail('houdjiva@gmail.com')
             ->setHash($this->encoder->encodePassword($adminUser, 'password'))
-            ->setPicture('https://avatars.io/twitter/vidjayLee')
+            ->setPicture($this->getGravatar($adminUser->getEmail()))
             ->setIntroduction($faker->sentence())
             ->setDescription('<p>' . join('</p><p>', $faker->paragraphs(3)) . '</p>')
-            ->addUserRole($adminRole);
+            ->addUserRole($adminRole)
+        ;
         $manager->persist($adminUser);
 
         // Nous gérons les utilisateurs
-        $users = [];
+        $users  = [];
         $genres = ['male', 'female'];
 
         for ($i = 1; $i <= 10; $i++) {
@@ -50,7 +52,7 @@ class AppFixtures extends Fixture
 
             $genre = $faker->randomElement($genres);
 
-            $picture = 'https://randomuser.me/api/portraits/';
+            $picture   = 'https://randomuser.me/api/portraits/';
             $pictureId = $faker->numberBetween(1, 99) . '.jpg';
 
             $picture .= ($genre == 'male' ? 'men/' : 'women/') . $pictureId;
@@ -63,7 +65,8 @@ class AppFixtures extends Fixture
                 ->setIntroduction($faker->sentence())
                 ->setDescription('<p>' . join('</p><p>', $faker->paragraphs(3)) . '</p>')
                 ->setHash($hash)
-                ->setPicture($picture);
+                ->setPicture($picture)
+            ;
 
             $manager->persist($user);
             $users[] = $user;
@@ -73,10 +76,10 @@ class AppFixtures extends Fixture
         for ($i = 1; $i <= 30; $i++) {
             $ad = new Ad();
 
-            $title = $faker->sentence();
-            $coverImage = $faker->imageUrl(1000, 350);
+            $title        = $faker->sentence();
+            $coverImage   = $faker->imageUrl(1000, 350);
             $introduction = $faker->paragraph(2);
-            $content = '<p>' . join('</p><p>', $faker->paragraphs(5)) . '</p>';
+            $content      = '<p>' . join('</p><p>', $faker->paragraphs(5)) . '</p>';
 
             $user = $users[mt_rand(0, count($users) - 1)];
 
@@ -86,14 +89,16 @@ class AppFixtures extends Fixture
                 ->setContent($content)
                 ->setPrice(mt_rand(40, 200))
                 ->setRooms(mt_rand(1, 5))
-                ->setAuthor($user);
+                ->setAuthor($user)
+            ;
 
             for ($j = 1; $j <= mt_rand(2, 5); $j++) {
                 $image = new Image();
 
                 $image->setUrl($faker->imageUrl())
                     ->setCaption($faker->sentence())
-                    ->setAd($ad);
+                    ->setAd($ad)
+                ;
 
                 $manager->persist($image);
             }
@@ -106,10 +111,10 @@ class AppFixtures extends Fixture
                 $startDate = $faker->dateTimeBetween('-3 months');
                 // Gestion de la date de fin
                 $duration = mt_rand(3, 10);
-                $endDate = (clone $startDate)->modify("+$duration days");
+                $endDate  = (clone $startDate)->modify("+$duration days");
 
-                $amount = $ad->getPrice() * $duration;
-                $booker = $users[mt_rand(0, count($users) - 1)];
+                $amount  = $ad->getPrice() * $duration;
+                $booker  = $users[mt_rand(0, count($users) - 1)];
                 $comment = $faker->paragraph();
 
                 $booking->setBooker($booker)
@@ -118,7 +123,8 @@ class AppFixtures extends Fixture
                     ->setEndDate($endDate)
                     ->setCreatedAt($createdAt)
                     ->setAmount($amount)
-                    ->setComment($comment);
+                    ->setComment($comment)
+                ;
 
                 $manager->persist($booking);
 
@@ -128,7 +134,8 @@ class AppFixtures extends Fixture
                     $comment->setContent($faker->paragraph())
                         ->setRating(mt_rand(1, 5))
                         ->setAuthor($booker)
-                        ->setAd($ad);
+                        ->setAd($ad)
+                    ;
 
                     $manager->persist($comment);
                 }
@@ -140,4 +147,30 @@ class AppFixtures extends Fixture
 
         $manager->flush();
     }
+
+    /**
+     * Get either a Gravatar URL or complete image tag for a specified email address.
+     *
+     * @param string $email The email address
+     * @param bool   $img   True to return a complete IMG tag False for just the URL
+     *
+     * @return String containing either just a URL or a complete image tag
+     * @source https://gravatar.com/site/implement/images/php/
+     */
+    private function getGravatar(string $email, bool $img = false, array $atts = []): string
+    {
+        $url = 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($email))) . "?s=80&d=mp&r=g";
+
+        if ($img) {
+            $url = '<img src="' . $url . '"';
+            foreach ($atts as $key => $val) {
+                $url .= ' ' . $key . '="' . $val . '"';
+            }
+            $url .= ' />';
+        }
+
+        return $url;
+    }
+
 }
+

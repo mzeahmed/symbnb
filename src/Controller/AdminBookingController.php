@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Booking;
 use App\Form\AdminBookingType;
 use App\Service\PaginationService;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,7 +23,7 @@ class AdminBookingController extends AbstractController
      * @param PaginationService $pagination
      * @return Response
      */
-    public function index($page, PaginationService $pagination)
+    public function index($page, PaginationService $pagination): Response
     {
         $pagination->setEntityClass(Booking::class);
         $pagination->setPage($page);
@@ -38,12 +38,13 @@ class AdminBookingController extends AbstractController
      *
      * @Route("/admin/bookings/{id}/edit", name="admin_booking_edit")
      *
-     * @param Booking $booking
-     * @param Request $request
-     * @param ObjectManager $manager
+     * @param Booking                $booking
+     * @param Request                $request
+     * @param EntityManagerInterface $manager
+     *
      * @return Response
      */
-    public function edit(Booking $booking, Request $request, ObjectManager $manager)
+    public function edit(Booking $booking, Request $request, EntityManagerInterface $manager): Response
     {
         $form = $this->createForm(AdminBookingType::class, $booking);
 
@@ -71,11 +72,12 @@ class AdminBookingController extends AbstractController
      *
      * @Route("/admin/bookings/{id}/delete", name="admin_booking_delete")
      *
-     * @param Booking $booking
-     * @param ObjectManager $manager
+     * @param Booking                $booking
+     * @param EntityManagerInterface $manager
+     *
      * @return RedirectResponse
      */
-    public function delete(Booking $booking, ObjectManager $manager)
+    public function delete(Booking $booking, EntityManagerInterface $manager): RedirectResponse
     {
         $manager->remove($booking);
         $manager->flush();

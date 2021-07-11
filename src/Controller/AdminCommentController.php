@@ -6,10 +6,12 @@ use App\Entity\Comment;
 use App\Form\AdminCommentType;
 use App\Repository\CommentRepository;
 use App\Service\PaginationService;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Response;
+
 
 class AdminCommentController extends AbstractController
 {
@@ -17,18 +19,19 @@ class AdminCommentController extends AbstractController
      * @Route("/admin/comments/{page<\d+>?1}", name="admin_comment_index")
      *
      * @param CommentRepository $repo
-     * @param $page
+     * @param                   $page
      * @param PaginationService $pagination
-     * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @return Response
      */
-    public function index(CommentRepository $repo, $page, PaginationService $pagination)
+    public function index(CommentRepository $repo, $page, PaginationService $pagination): Response
     {
         $pagination->setEntityClass(Comment::class);
         $pagination->setLimit(5);
         $pagination->setPage($page);
 
         return $this->render('admin/comment/index.html.twig', [
-            'pagination' => $pagination
+            'pagination' => $pagination,
         ]);
     }
 
@@ -37,12 +40,13 @@ class AdminCommentController extends AbstractController
      *
      * @Route("/admin/comments/{id}/edit", name="admin_comment_edit")
      *
-     * @param Comment $comment
-     * @param Request $request
-     * @param ObjectManager $manager
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param Comment                $comment
+     * @param Request                $request
+     * @param EntityManagerInterface $manager
+     *
+     * @return Response
      */
-    public function edit(Comment $comment, Request $request, ObjectManager $manager)
+    public function edit(Comment $comment, Request $request, EntityManagerInterface $manager): Response
     {
         $form = $this->createForm(AdminCommentType::class, $comment);
 
@@ -57,7 +61,7 @@ class AdminCommentController extends AbstractController
 
         return $this->render('admin/comment/edit.html.twig', [
             'comment' => $comment,
-            'form' => $form->createView()
+            'form' => $form->createView(),
         ]);
     }
 
@@ -66,11 +70,12 @@ class AdminCommentController extends AbstractController
      *
      * @Route("/admin/comments/{id}/delete", name="admin_comment_delete")
      *
-     * @param Comment $comment
-     * @param ObjectManager $manager
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @param Comment                $comment
+     * @param EntityManagerInterface $manager
+     *
+     * @return Response
      */
-    public function delete(Comment $comment, ObjectManager $manager)
+    public function delete(Comment $comment, EntityManagerInterface $manager): Response
     {
         $manager->remove($comment);
         $manager->flush();

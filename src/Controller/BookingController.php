@@ -7,7 +7,7 @@ use App\Entity\Booking;
 use App\Entity\Comment;
 use App\Form\BookingType;
 use App\Form\CommentType;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,12 +20,13 @@ class BookingController extends AbstractController
      * @Route("/ads/{slug}/book", name="booking_create")
      * @IsGranted("ROLE_USER")
      *
-     * @param Ad $ad
-     * @param Request $request
-     * @param ObjectManager $manager
+     * @param Ad                     $ad
+     * @param Request                $request
+     * @param EntityManagerInterface $manager
+     *
      * @return Response
      */
-    public function book(Ad $ad, Request $request, ObjectManager $manager)
+    public function book(Ad $ad, Request $request, EntityManagerInterface $manager): Response
     {
         $booking = new Booking();
         $form = $this->createForm(BookingType::class, $booking);
@@ -61,12 +62,13 @@ class BookingController extends AbstractController
      *
      * @Route("/booking/{id}", name="booking_show")
      *
-     * @param Booking $booking
-     * @param Request $request
-     * @param ObjectManager $manager
+     * @param Booking                $booking
+     * @param Request                $request
+     * @param EntityManagerInterface $manager
+     *
      * @return Response
      */
-    public function show(Booking $booking, Request $request, ObjectManager $manager)
+    public function show(Booking $booking, Request $request, EntityManagerInterface $manager): Response
     {
         $comment = new Comment();
 
