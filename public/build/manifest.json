@@ -1,9 +1,8 @@
 {
-  "build/ad.js": "/build/ad.js",
-  "build/app.css": "/build/app.css",
-  "build/app.js": "/build/app.js",
-  "build/runtime.js": "/build/runtime.js",
-  "build/vendors~ad.js": "/build/vendors~ad.js",
-  "build/vendors~app.css": "/build/vendors~app.css",
-  "build/vendors~app.js": "/build/vendors~app.js"
+  "build/app.css": "/build/app.5499acc2.css",
+  "build/app.js": "/build/app.db7533dc.js",
+  "build/ad.js": "/build/ad.caa3135b.js",
+  "build/runtime.js": "/build/runtime.68a6a20a.js",
+  "build/771.8dd35bf3.css": "/build/771.8dd35bf3.css",
+  "build/771.d05c574b.js": "/build/771.d05c574b.js"
 }
