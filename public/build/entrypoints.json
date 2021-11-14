@@ -2,19 +2,20 @@
   "entrypoints": {
     "app": {
       "js": [
-        "/build/runtime.68a6a20a.js",
-        "/build/771.d05c574b.js",
-        "/build/app.db7533dc.js"
+        "/build/runtime.js",
+        "/build/vendors-node_modules_bootstrap_dist_js_bootstrap_js-node_modules_bootswatch_dist_cerulean_boo-92b937.js",
+        "/build/app.js"
       ],
       "css": [
-        "/build/771.8dd35bf3.css",
-        "/build/app.5499acc2.css"
+        "/build/vendors-node_modules_bootstrap_dist_js_bootstrap_js-node_modules_bootswatch_dist_cerulean_boo-92b937.css",
+        "/build/app.css"
       ]
     },
     "ad": {
       "js": [
-        "/build/runtime.68a6a20a.js",
-        "/build/ad.caa3135b.js"
+        "/build/runtime.js",
+        "/build/vendors-node_modules_core-js_modules_es_string_replace_js.js",
+        "/build/ad.js"
       ]
     }
   }

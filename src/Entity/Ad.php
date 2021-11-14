@@ -30,40 +30,40 @@ class Ad
      * @ORM\Column(type="string", length=255)
      * @Assert\Length(min=10, max=255, minMessage="Le titre doit faire plus de 10 caractères !", maxMessage="Le titre ne peut pas faire plus de 255 caractères !")
      */
-    private $title;
+    private ?string $title;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $slug;
+    private ?string $slug;
 
     /**
      * @ORM\Column(type="float")
      */
-    private $price;
+    private ?float $price;
 
     /**
      * @ORM\Column(type="text")
      * @Assert\Length(min=20, minMessage="Votre introduction doit faire plus de 20 caractères !")
      */
-    private $introduction;
+    private ?string $introduction;
 
     /**
      * @ORM\Column(type="text")
      * @Assert\Length(min=100, minMessage="Votre description doit faire moins de 100 caractères !")
      */
-    private $content;
+    private ?string $content;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\Url()
      */
-    private $coverImage;
+    private ?string $coverImage;
 
     /**
      * @ORM\Column(type="integer")
      */
-    private $rooms;
+    private ?int $rooms;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Image", mappedBy="ad", orphanRemoval=true)
@@ -75,7 +75,7 @@ class Ad
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="ads")
      * @ORM\JoinColumn(nullable=false)
      */
-    private $author;
+    private ?User $author;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Booking", mappedBy="ad")
@@ -114,9 +114,10 @@ class Ad
      * Permet de récuperer le commentaire d'un auteur par rapport à une annonce
      *
      * @param User $author
-     * @return mixed|null
+     *
+     * @return mixed
      */
-    public function getCommentFromAuthor(User $author)
+    public function getCommentFromAuthor(User $author): mixed
     {
         foreach ($this->comments as $comment) {
             if ($comment->getAuthor() === $author) return $comment;
@@ -126,7 +127,7 @@ class Ad
     }
 
     /**
-     * Permet d'obtenir lam oyenne globale des notes pour cette annonce
+     * Permet d'obtenir la moyenne globale des notes pour cette annonce
      *
      * @return float|int
      */
@@ -146,9 +147,10 @@ class Ad
     /**
      * Permet d'obtenir un tableau des jours qui ne sont pas disponibles pour cette annonce
      *
-     * @return array Untableau d'objets DateTime representant les jours d'oocupation
+     * @return array Un tableau d'objets DateTime representant les jours d'oocupation
+     * @throws \Exception
      */
-    public function getNotAvailableDays()
+    public function getNotAvailableDays(): array
     {
         $notAvailableDays = [];
 

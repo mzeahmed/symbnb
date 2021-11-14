@@ -84,8 +84,9 @@ class Booking
      * Permet de savoir si une journée est disponible pour la réservation
      *
      * @return bool
+     * @throws \Exception
      */
-    public function isBookableDates()
+    public function isBookableDates(): bool
     {
         // 1) Il faut connaitre les dates qui sont impossoble pour l'annonce
         $notAvailableDays = $this->ad->getNotAvailableDays();
@@ -111,9 +112,10 @@ class Booking
     /**
      * Permet de récupérer un tableau des journés qui correspondent à ma réservation
      *
-     * @return  Array Un tableau d'objets DataTime représentant les jours de ma réservation
+     * @return  \DateTime[] Un tableau d'objets DataTime représentant les jours de ma réservation
+     * @throws \Exception
      */
-    public function getDays()
+    public function getDays(): array
     {
         $resultat = range(
             $this->startDate->getTimestamp(),
@@ -121,11 +123,9 @@ class Booking
             24 * 60 * 60
         );
 
-        $days = array_map(function ($dayTimestamp) {
+        return array_map(function ($dayTimestamp) {
             return new \DateTime(date('Y-m-d', $dayTimestamp));
         }, $resultat);
-
-        return $days;
     }
 
     /**

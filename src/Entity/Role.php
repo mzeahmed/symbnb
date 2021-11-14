@@ -21,7 +21,7 @@ class Role
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $title;
+    private ?string $title;
 
     /**
      * @ORM\ManyToMany(targetEntity="App\Entity\user", inversedBy="userRoles")
@@ -51,7 +51,7 @@ class Role
     }
 
     /**
-     * @return Collection|user[]
+     * @return Collection
      */
     public function getUsers(): Collection
     {
