@@ -13,3 +13,5 @@ const $ = require('jquery')
 global.$ = global.jQuery = $
 
 require('bootstrap')
+
+import '../stimulus_bootstrap.js'

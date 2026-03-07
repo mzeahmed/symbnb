@@ -7,7 +7,7 @@ use Symfony\Component\Form\Exception\TransformationFailedException;
 
 class FrenchToDateTimeTransformer implements DataTransformerInterface
 {
-    public function transform($date)
+    public function transform(mixed $date): mixed
     {
         if ($date === null) {
             return '';
@@ -16,7 +16,7 @@ class FrenchToDateTimeTransformer implements DataTransformerInterface
         return $date->format('d/m/Y');
     }
 
-    public function reverseTransform($frenchDate)
+    public function reverseTransform(mixed $frenchDate): mixed
     {
         // frenchDate = 21/09/2018
         if ($frenchDate === null) {

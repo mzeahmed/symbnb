@@ -259,7 +259,7 @@ class User implements UserInterface
     }
 
 
-    public function getRoles()
+    public function getRoles(): array
     {
         $roles = $this->userRoles->map(function ($role){
            return $role->getTitle();
@@ -270,21 +270,27 @@ class User implements UserInterface
         return $roles;
     }
 
-    public function getPassword()
+    public function getPassword(): ?string
     {
         return $this->hash;
     }
 
-    public function getSalt()
+    public function getSalt(): ?string
     {
+        return null;
     }
 
-    public function getUsername()
+    public function getUsername(): string
     {
         return $this->email;
     }
 
-    public function eraseCredentials()
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+
+    public function eraseCredentials(): void
     {
     }
 
