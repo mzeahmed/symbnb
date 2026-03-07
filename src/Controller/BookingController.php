@@ -8,24 +8,16 @@ use App\Entity\Comment;
 use App\Form\BookingType;
 use App\Form\CommentType;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class BookingController extends AbstractController
 {
-    /**
-     * @Route("/ads/{slug}/book", name="booking_create")
-     * @IsGranted("ROLE_USER")
-     *
-     * @param Ad                     $ad
-     * @param Request                $request
-     * @param EntityManagerInterface $manager
-     *
-     * @return Response
-     */
+    #[Route('/ads/{slug}/book', name: 'booking_create')]
+    #[IsGranted('ROLE_USER')]
     public function book(Ad $ad, Request $request, EntityManagerInterface $manager): Response
     {
         $booking = new Booking();
@@ -57,17 +49,7 @@ class BookingController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet d'afficher la page d'une réservation
-     *
-     * @Route("/booking/{id}", name="booking_show")
-     *
-     * @param Booking                $booking
-     * @param Request                $request
-     * @param EntityManagerInterface $manager
-     *
-     * @return Response
-     */
+    #[Route('/booking/{id}', name: 'booking_show')]
     public function show(Booking $booking, Request $request, EntityManagerInterface $manager): Response
     {
         $comment = new Comment();

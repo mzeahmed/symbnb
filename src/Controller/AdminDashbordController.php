@@ -4,18 +4,13 @@ namespace App\Controller;
 
 use App\Service\StatsService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 
 class AdminDashbordController extends AbstractController
 {
-    /**
-     * @Route("/admin", name="admin_dashbord")
-     * @param StatsService $statsService
-     *
-     * @return Response
-     */
+    #[Route('/admin', name: 'admin_dashbord')]
     public function index(StatsService $statsService): Response
     {
         $stats = $statsService->getStats();

@@ -10,19 +10,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class AdminBookingController extends AbstractController
 {
-    /**
-     * Permet d'afficher les reservations
-     *
-     * @Route("/admin/bookings/{page<\d+>?1}", name="admin_booking_index")
-     *
-     * @param $page
-     * @param PaginationService $pagination
-     * @return Response
-     */
+    #[Route('/admin/bookings/{page<\d+>?1}', name: 'admin_booking_index')]
     public function index($page, PaginationService $pagination): Response
     {
         $pagination->setEntityClass(Booking::class);
@@ -33,17 +25,7 @@ class AdminBookingController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet d'editer une réservation
-     *
-     * @Route("/admin/bookings/{id}/edit", name="admin_booking_edit")
-     *
-     * @param Booking                $booking
-     * @param Request                $request
-     * @param EntityManagerInterface $manager
-     *
-     * @return Response
-     */
+    #[Route('/admin/bookings/{id}/edit', name: 'admin_booking_edit')]
     public function edit(Booking $booking, Request $request, EntityManagerInterface $manager): Response
     {
         $form = $this->createForm(AdminBookingType::class, $booking);
@@ -67,16 +49,7 @@ class AdminBookingController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet de supprimer une reservation
-     *
-     * @Route("/admin/bookings/{id}/delete", name="admin_booking_delete")
-     *
-     * @param Booking                $booking
-     * @param EntityManagerInterface $manager
-     *
-     * @return RedirectResponse
-     */
+    #[Route('/admin/bookings/{id}/delete', name: 'admin_booking_delete')]
     public function delete(Booking $booking, EntityManagerInterface $manager): RedirectResponse
     {
         $manager->remove($booking);

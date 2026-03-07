@@ -8,25 +8,18 @@ use App\Form\AccountType;
 use App\Form\PasswordUpdateType;
 use App\Form\RegistrationType;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class AccountController extends AbstractController
 {
-    /**
-     * Permet d'afficher et de gére le formulaire de connexion
-     *
-     * @Route("/login", name="account_login")
-     *
-     * @param AuthenticationUtils $utils
-     * @return Response
-     */
+    #[Route('/login', name: 'account_login')]
     public function login(AuthenticationUtils $utils): Response
     {
         $error = $utils->getLastAuthenticationError();
@@ -38,29 +31,13 @@ class AccountController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet de se déconnecter
-     *
-     * @Route("/logout", name="account_logout")
-     *
-     * @return Void
-     */
+    #[Route('/logout', name: 'account_logout')]
     public function logout()
     {
         // ... rien !
     }
 
-    /**
-     * Permet de'afficher le formulaire d'inscription
-     *
-     * @Route("/register", name="account_register")
-     *
-     * @param Request                      $request
-     * @param EntityManagerInterface       $manager
-     * @param UserPasswordEncoderInterface $encoder
-     *
-     * @return Response
-     */
+    #[Route('/register', name: 'account_register')]
     public function register(Request $request, EntityManagerInterface $manager, UserPasswordEncoderInterface $encoder)
     {
         $user = new user();
@@ -86,17 +63,8 @@ class AccountController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet d'afficher et de traiter le formulaire de modification de profil
-     *
-     * @Route("/account/profile", name="account_profile")
-     * @IsGranted("ROLE_USER")
-     *
-     * @param Request                $request
-     * @param EntityManagerInterface $manager
-     *
-     * @return Response
-     */
+    #[Route('/account/profile', name: 'account_profile')]
+    #[IsGranted('ROLE_USER')]
     public function profile(Request $request, EntityManagerInterface $manager): Response
     {
         $user = $this->getUser();
@@ -117,18 +85,8 @@ class AccountController extends AbstractController
         ]);
     }
 
-    /**
-     * * Permet de modidifier le mot de passe
-     *
-     * @Route("/account/password-update", name="account_password")
-     * @IsGranted("ROLE_USER")
-     *
-     * @param Request                      $request
-     * @param UserPasswordEncoderInterface $encoder
-     * @param EntityManagerInterface       $manager
-     *
-     * @return Response
-     */
+    #[Route('/account/password-update', name: 'account_password')]
+    #[IsGranted('ROLE_USER')]
     public function updatePassword(Request $request, UserPasswordEncoderInterface $encoder, EntityManagerInterface $manager): Response
     {
         $passwordUpdate = new PasswordUpdate();
@@ -164,14 +122,8 @@ class AccountController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet d'afficher le profil de l'utilisateur connecté
-     *
-     * @Route("/account", name="account_index")
-     * @IsGranted("ROLE_USER")
-     *
-     * @return Response
-     */
+    #[Route('/account', name: 'account_index')]
+    #[IsGranted('ROLE_USER')]
     public function myAccount()
     {
         return $this->render('user/index.html.twig', [
@@ -179,13 +131,7 @@ class AccountController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet d'afficher la liste des reservations faites par l'utilisateur
-     *
-     * @Route("/account/bookings", name="account_bookings")
-     *
-     * @return Response
-     */
+    #[Route('/account/bookings', name: 'account_bookings')]
     public function bookings()
     {
         return $this->render('account/bookings.html.twig');

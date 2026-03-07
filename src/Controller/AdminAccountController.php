@@ -4,17 +4,12 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class AdminAccountController extends AbstractController
 {
-    /**
-     * @Route("/admin/login", name="admin_account_login")
-     *
-     * @param AuthenticationUtils $utils
-     * @return Response
-     */
+    #[Route('/admin/login', name: 'admin_account_login')]
     public function login(AuthenticationUtils $utils)
     {
         $error = $utils->getLastAuthenticationError();
@@ -26,11 +21,7 @@ class AdminAccountController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet de se déconnecter
-     *
-     * @Route("/admin/logout", name="admin_account_logout")
-     */
+    #[Route('/admin/logout', name: 'admin_account_logout')]
     public function logout()
     {
         // ...

@@ -3,14 +3,14 @@
 namespace App\DataFixtures;
 
 use App\Entity\Ad;
-use App\Entity\Booking;
-use App\Entity\Comment;
-use App\Entity\Image;
+use Faker\Factory;
 use App\Entity\Role;
 use App\Entity\User;
-use Doctrine\Bundle\FixturesBundle\Fixture;
+use App\Entity\Image;
+use App\Entity\Booking;
+use App\Entity\Comment;
 use Doctrine\Persistence\ObjectManager;
-use Faker\Factory;
+use Doctrine\Bundle\FixturesBundle\Fixture;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
@@ -35,7 +35,7 @@ class AppFixtures extends Fixture
         $adminUser->setFirstName('Ahmed')
                   ->setLastName('Mze')
                   ->setEmail('houdjiva@gmail.com')
-                  ->setHash($this->encoder->encodePassword($adminUser, 'password'))
+                  ->setHash($this->encoder->hashPassword($adminUser, 'password'))
                   ->setPicture($this->getGravatar($adminUser->getEmail()))
                   ->setIntroduction($faker->sentence())
                   ->setDescription('<p>' . join('</p><p>', $faker->paragraphs(3)) . '</p>')

@@ -5,22 +5,16 @@ namespace App\Controller;
 use App\Entity\Ad;
 use App\Form\AdType;
 use App\Repository\AdRepository;
-use Doctrine\Common\Persistence\ObjectManager;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class AdController extends AbstractController
 {
-    /**
-     * @Route("/ads", name="ads_index")
-     *
-     * @param AdRepository $repo
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
+    #[Route('/ads', name: 'ads_index')]
     public function index(AdRepository $repo)
     {
         $ads = $repo->findAll();
@@ -30,17 +24,9 @@ class AdController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet de créer une annonce
-     *
-     * @Route("/ads/new", name="ads_create")
-     * @IsGranted("ROLE_USER")
-     *
-     * @param Request $request
-     * @param ObjectManager $manager
-     * @return Response
-     */
-    public function create(Request $request, ObjectManager $manager)
+    #[Route('/ads/new', name: 'ads_create')]
+    #[IsGranted('ROLE_USER')]
+    public function create(Request $request, EntityManagerInterface $manager)
     {
         $ad = new Ad();
 
@@ -71,19 +57,13 @@ class AdController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet d'afficher le formulaire d'édition
-     *
-     * @Route("/ads/{slug}/edit", name="ads_edit")
-     * @Security("is_granted('ROLE_USER') and user === ad.getAuthor()", message="Cette annonce ne vous appartient pas, vous ne pouvez pas la modifier")
-     *
-     * @param Ad $ad
-     * @param Request $request
-     * @param ObjectManager $manager
-     * @return Response
-     */
-    public function edit(Ad $ad, Request $request, ObjectManager $manager)
+    #[Route('/ads/{slug}/edit', name: 'ads_edit')]
+    #[IsGranted('ROLE_USER')]
+    public function edit(Ad $ad, Request $request, EntityManagerInterface $manager)
     {
+        if ($this->getUser() !== $ad->getAuthor()) {
+            throw $this->createAccessDeniedException("Cette annonce ne vous appartient pas, vous ne pouvez pas la modifier");
+        }
         $form = $this->createForm(AdType::class, $ad);
 
         $form->handleRequest($request);
@@ -110,14 +90,7 @@ class AdController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet d'afficher une seule annonce
-     *
-     * @Route("/ads/{slug}", name="ads_show")
-     *
-     * @param Ad $ad
-     * @return Response
-     */
+    #[Route('/ads/{slug}', name: 'ads_show')]
     public function show(Ad $ad)
     {
         return $this->render('ad/show.html.twig', [
@@ -125,18 +98,13 @@ class AdController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet de supprimer une annonce
-     *
-     * @Route("/ads/{slug}/delete", name="ads_delete")
-     * @Security("is_granted('ROLE_USER') and user == ad.getAuthor()", message="Vous n'avez pas le droit d'acceder à cette ressource")
-     *
-     * @param Ad $ad
-     * @param ObjectManager $manager
-     * @return Response
-     */
-    public function delete(Ad $ad,ObjectManager $manager)
+    #[Route('/ads/{slug}/delete', name: 'ads_delete')]
+    #[IsGranted('ROLE_USER')]
+    public function delete(Ad $ad, EntityManagerInterface $manager)
     {
+        if ($this->getUser() !== $ad->getAuthor()) {
+            throw $this->createAccessDeniedException("Vous n'avez pas le droit d'acceder à cette ressource");
+        }
         $manager->remove($ad);
         $manager->flush();
 

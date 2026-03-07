@@ -9,21 +9,13 @@ use App\Service\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 
 class AdminCommentController extends AbstractController
 {
-    /**
-     * @Route("/admin/comments/{page<\d+>?1}", name="admin_comment_index")
-     *
-     * @param CommentRepository $repo
-     * @param                   $page
-     * @param PaginationService $pagination
-     *
-     * @return Response
-     */
+    #[Route('/admin/comments/{page<\d+>?1}', name: 'admin_comment_index')]
     public function index(CommentRepository $repo, $page, PaginationService $pagination): Response
     {
         $pagination->setEntityClass(Comment::class);
@@ -35,17 +27,7 @@ class AdminCommentController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet de modifier un commentaire
-     *
-     * @Route("/admin/comments/{id}/edit", name="admin_comment_edit")
-     *
-     * @param Comment                $comment
-     * @param Request                $request
-     * @param EntityManagerInterface $manager
-     *
-     * @return Response
-     */
+    #[Route('/admin/comments/{id}/edit', name: 'admin_comment_edit')]
     public function edit(Comment $comment, Request $request, EntityManagerInterface $manager): Response
     {
         $form = $this->createForm(AdminCommentType::class, $comment);
@@ -65,16 +47,7 @@ class AdminCommentController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet de supprimmer un commentaire
-     *
-     * @Route("/admin/comments/{id}/delete", name="admin_comment_delete")
-     *
-     * @param Comment                $comment
-     * @param EntityManagerInterface $manager
-     *
-     * @return Response
-     */
+    #[Route('/admin/comments/{id}/delete', name: 'admin_comment_delete')]
     public function delete(Comment $comment, EntityManagerInterface $manager): Response
     {
         $manager->remove($comment);

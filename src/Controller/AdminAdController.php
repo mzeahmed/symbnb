@@ -6,24 +6,15 @@ use App\Entity\Ad;
 use App\Form\AdType;
 use App\Repository\AdRepository;
 use App\Service\PaginationService;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class AdminAdController extends AbstractController
 {
-    /**
-     * Affichage des annonces avec pagination de 10
-     *
-     * @Route("/admin/ads/{page<\d+>?1}", name="admin_ads_index")
-     *
-     * @param AdRepository $repo
-     * @param int $page
-     * @param PaginationService $pagination
-     * @return Response
-     */
+    #[Route('/admin/ads/{page<\d+>?1}', name: 'admin_ads_index')]
     public function index(AdRepository $repo, $page, PaginationService $pagination)
     {
         $pagination->setEntityClass(Ad::class);
@@ -34,17 +25,8 @@ class AdminAdController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet d'afficher le formulaire d'édition
-     *
-     * @Route("/admin/ads/{id}/edit", name="admin_ads_edit")
-     *
-     * @param Ad $ad
-     * @param Request $request
-     * @param ObjectManager $manager
-     * @return Response
-     */
-    public function edit(Ad $ad, Request $request, ObjectManager $manager)
+    #[Route('/admin/ads/{id}/edit', name: 'admin_ads_edit')]
+    public function edit(Ad $ad, Request $request, EntityManagerInterface $manager)
     {
         $form = $this->createForm(AdType::class, $ad);
 
@@ -63,16 +45,8 @@ class AdminAdController extends AbstractController
         ]);
     }
 
-    /**
-     * Permet de supprimer une annonce
-     *
-     * @Route("/admin/ads/{id}/delete", name="admin_ads_delete")
-     *
-     * @param Ad $ad
-     * @param ObjectManager $manager
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
-     */
-    public function delete(Ad $ad, ObjectManager $manager)
+    #[Route('/admin/ads/{id}/delete', name: 'admin_ads_delete')]
+    public function delete(Ad $ad, EntityManagerInterface $manager)
     {
         if (count($ad->getBookings()) > 0) {
             $this->addFlash(
