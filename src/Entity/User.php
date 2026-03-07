@@ -1,115 +1,87 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use Cocur\Slugify\Slugify;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
- * @ORM\HasLifecycleCallbacks()
- * @UniqueEntity(
- *     fields={"email"},
- *     message="Un autre utilisateur s'est déjà inscrit avec cette adresse email, merci de la modifier !"
- * )
- */
-class User implements UserInterface
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Table(name: 'users')]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['email'], message: 'Another user has already registered with this email address, please modify it!')]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="Vous devez renseigner votre prenom !")
-     */
-    private $firstName;
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\NotBlank(message: 'You must enter your first name!')]
+    private ?string $firstName = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="Vous devez renseigner votre nom de famille !")
-     */
-    private $lastName;
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\NotBlank(message: 'You must enter your last name!')]
+    private ?string $lastName = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\Email(message="Veuillez renseigner un email valide !")
-     */
-    private $email;
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\Email(message: 'Please enter a valid email!')]
+    private ?string $email = null;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     * @Assert\Url(message="Veuillez donner une URL valide pour votre avatar !")
-     */
-    private $picture;
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Assert\Url(message: 'Please provide a valid URL for your avatar!')]
+    private ?string $picture = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $hash;
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $hash = null;
 
-    /**
-     * @Assert\EqualTo(propertyPath="hash", message="Vous n'avez pas correctement confirmé votre mot de passe !")
-     */
-    public $passwordConfirm;
+    #[Assert\EqualTo(propertyPath: 'hash', message: 'You have not correctly confirmed your password!')]
+    public ?string $passwordConfirm = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\Length(min=10, minMessage="Votre introduction doit faire au moins 10 caratctères !")
-     */
-    private $introduction;
+    #[ORM\Column(type: 'string', length: 255)]
+    // #[Assert\Length(min: 10, minMessage: 'Your introduction must be at least 10 characters!')]
+    private ?string $introduction = null;
 
-    /**
-     * @ORM\Column(type="text")
-     * @Assert\Length(min=100, minMessage="Votre description doit faire au moins 100 caratctères !")
-     */
-    private $description;
+    #[ORM\Column(type: 'text')]
+    // #[Assert\Length(min: 100, minMessage: 'Your description must be at least 100 characters!')]
+    private ?string $description = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $slug;
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $slug = null;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Ad", mappedBy="author")
-     */
-    private $ads;
+    #[ORM\OneToMany(targetEntity: Ad::class, mappedBy: 'author')]
+    private Collection $ads;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Role", mappedBy="users")
-     */
-    private $userRoles;
+    #[ORM\ManyToMany(targetEntity: Role::class, mappedBy: 'users')]
+    private Collection $userRoles;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Booking", mappedBy="booker")
-     */
-    private $bookings;
+    #[ORM\OneToMany(targetEntity: Booking::class, mappedBy: 'booker')]
+    private Collection $bookings;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Comment", mappedBy="author", orphanRemoval=true)
-     */
-    private $comments;
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'author', orphanRemoval: true)]
+    private Collection $comments;
 
-    public function getFullName(){
+    public function getFullName()
+    {
         return "{$this->firstName} {$this->lastName}";
     }
 
     /**
-     * Initialise les slugs automatiquement en fonction du firstName et du lastName
-     *
-     * @ORM\PrePersist
-     * @ORM\PreUpdate
+     * Initialize slugs automatically based on firstName and lastName
      *
      * @return  void
      */
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
     public function initilizeSlug()
     {
         if (empty($this->slug)) {
@@ -258,11 +230,10 @@ class User implements UserInterface
         return $this;
     }
 
-
     public function getRoles(): array
     {
-        $roles = $this->userRoles->map(function ($role){
-           return $role->getTitle();
+        $roles = $this->userRoles->map(function ($role) {
+            return $role->getTitle();
         })->toArray();
 
         $roles[] = 'ROLE_USER';

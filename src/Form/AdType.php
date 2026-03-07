@@ -1,20 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Form;
 
 use App\Entity\Ad;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\MoneyType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\MoneyType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 
 class AdType extends ApplicationType
 {
-
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
@@ -27,7 +28,7 @@ class AdType extends ApplicationType
                 'slug',
                 TextType::class,
                 $this->getConfiguration('Adresse web', 'Tapez l\'adresse web(automatique)', [
-                    'required' => false
+                    'required' => false,
                 ])
             )
             ->add(
@@ -57,10 +58,11 @@ class AdType extends ApplicationType
             )
             ->add(
                 'images',
-                CollectionType::class, [
+                CollectionType::class,
+                [
                     'entry_type' => ImageType::class,
                     'allow_add' => true,
-                    'allow_delete' => true
+                    'allow_delete' => true,
                 ]
             );
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DataFixtures;
 
 use App\Entity\Ad;
@@ -30,7 +32,7 @@ class AppFixtures extends Fixture
         $adminRole->setTitle('ROLE_ADMIN');
         $manager->persist($adminRole);
 
-        $adminUser = new User;
+        $adminUser = new User();
 
         $adminUser->setFirstName('Ahmed')
                   ->setLastName('Mze')
@@ -135,7 +137,6 @@ class AppFixtures extends Fixture
                 }
             }
 
-
             $manager->persist($ad);
         }
 
@@ -153,7 +154,7 @@ class AppFixtures extends Fixture
      */
     private function getGravatar(string $email, bool $img = false, array $atts = []): string
     {
-        $url = 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($email))) . "?s=80&d=mp&r=g";
+        $url = 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($email))) . '?s=80&d=mp&r=g';
 
         if ($img) {
             $url = '<img src="' . $url . '"';
@@ -165,6 +166,4 @@ class AppFixtures extends Fixture
 
         return $url;
     }
-
 }
-

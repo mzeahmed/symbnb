@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Entity\User;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
@@ -26,23 +28,23 @@ class UserRepository extends ServiceEntityRepository
      *
      * @return mixed
      */
-    public function findBestUsers(int $limit=2)
+    public function findBestUsers(int $limit = 2)
     {
         return $this->createQueryBuilder('u')
             ->join('u.ads', 'a')
             ->join('a.comments', 'c')
             ->select('u as user, AVG(c.rating) as avgRating, COUNT(c) as sumComments')
             ->groupBy('u')
-            ->having('sumComments > 3')
+            ->having('COUNT(c) > 3')
             ->orderBy('avgRating', 'DESC')
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
     }
 
-//    /**
-//     * @return User[] Returns an array of User objects
-//     */
+    //    /**
+    //     * @return User[] Returns an array of User objects
+    //     */
     /*
     public function findByExampleField($value)
     {

@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Form;
 
 use App\Entity\Image;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TelType;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\TelType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class ImageType extends AbstractType
 {
@@ -16,13 +18,13 @@ class ImageType extends AbstractType
         $builder
             ->add('url', UrlType::class, [
                 'attr' => [
-                    'placeholder' => "Url de l'image"
-                ]
+                    'placeholder' => "Url de l'image",
+                ],
             ])
             ->add('caption', TelType::class, [
                 'attr' => [
-                    'placeholder' => "Titre de l'image"
-                ]
+                    'placeholder' => "Titre de l'image",
+                ],
             ])
         ;
     }

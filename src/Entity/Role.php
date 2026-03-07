@@ -1,32 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\RoleRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\RoleRepository")
- */
+#[ORM\Entity(repositoryClass: RoleRepository::class)]
 class Role
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private ?string $title;
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $title = null;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\user", inversedBy="userRoles")
-     */
-    private $users;
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'userRoles')]
+    private Collection $users;
 
     public function __construct()
     {

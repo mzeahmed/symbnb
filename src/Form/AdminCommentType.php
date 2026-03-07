@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Form;
 
 use App\Entity\Comment;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class AdminCommentType extends AbstractType
 {
@@ -14,10 +16,10 @@ class AdminCommentType extends AbstractType
     {
         $builder
             ->add('content', TextareaType::class, [
-                'label' => "Contenu du commentaire",
+                'label' => 'Contenu du commentaire',
                 'attr' => [
-                    'placeholder' => "Modifier / corrigez le contenue du commentaire !"
-                ]
+                    'placeholder' => 'Modifier / corrigez le contenue du commentaire !',
+                ],
             ]);
     }
 

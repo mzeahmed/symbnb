@@ -1,16 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Ad;
 use App\Form\AdType;
 use App\Repository\AdRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class AdController extends AbstractController
 {
@@ -20,7 +21,7 @@ class AdController extends AbstractController
         $ads = $repo->findAll();
 
         return $this->render('ad/index.html.twig', [
-            'ads' => $ads
+            'ads' => $ads,
         ]);
     }
 
@@ -35,7 +36,7 @@ class AdController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            foreach ($ad->getImages() as $image){
+            foreach ($ad->getImages() as $image) {
                 $image->setAd($ad);
                 $manager->persist($image);
             }
@@ -48,12 +49,12 @@ class AdController extends AbstractController
             $this->addFlash('success', "l'annonce <strong>{$ad->getTitle()}</strong> a bien été enregistrée !");
 
             return $this->redirectToRoute('ads_show', [
-                'slug' => $ad->getSlug()
+                'slug' => $ad->getSlug(),
             ]);
         }
 
         return $this->render('ad/new.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
         ]);
     }
 
@@ -62,14 +63,14 @@ class AdController extends AbstractController
     public function edit(Ad $ad, Request $request, EntityManagerInterface $manager)
     {
         if ($this->getUser() !== $ad->getAuthor()) {
-            throw $this->createAccessDeniedException("Cette annonce ne vous appartient pas, vous ne pouvez pas la modifier");
+            throw $this->createAccessDeniedException('Cette annonce ne vous appartient pas, vous ne pouvez pas la modifier');
         }
         $form = $this->createForm(AdType::class, $ad);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            foreach ($ad->getImages() as $image){
+            foreach ($ad->getImages() as $image) {
                 $image->setAd($ad);
                 $manager->persist($image);
             }
@@ -80,13 +81,13 @@ class AdController extends AbstractController
             $this->addFlash('success', "les modifications de l'annonce <strong>{$ad->getTitle()}</strong> ont bien étés enregistrées !");
 
             return $this->redirectToRoute('ads_show', [
-                'slug' => $ad->getSlug()
+                'slug' => $ad->getSlug(),
             ]);
         }
 
         return $this->render('ad/edit.html.twig', [
             'form' => $form->createView(),
-            'ad' => $ad
+            'ad' => $ad,
         ]);
     }
 
@@ -94,7 +95,7 @@ class AdController extends AbstractController
     public function show(Ad $ad)
     {
         return $this->render('ad/show.html.twig', [
-            'ad' => $ad
+            'ad' => $ad,
         ]);
     }
 
@@ -110,6 +111,6 @@ class AdController extends AbstractController
 
         $this->addFlash('success', "L'annonce <strong>{$ad->getTitle()}</strong> a bien été supprimée");
 
-        return $this->redirectToRoute("ads_index");
+        return $this->redirectToRoute('ads_index');
     }
 }

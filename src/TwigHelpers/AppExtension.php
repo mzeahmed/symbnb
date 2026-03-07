@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\TwigHelpers;
 
-use Symfony\Component\HttpFoundation\RequestStack;
-use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+use Twig\Extension\AbstractExtension;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class AppExtension extends AbstractExtension
 {
@@ -12,7 +14,7 @@ class AppExtension extends AbstractExtension
 
     // private TranslatorInterface $translator;
 
-    public function __construct(RequestStack $requestStack,)
+    public function __construct(RequestStack $requestStack)
     {
         $this->requestStack = $requestStack;
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Ad;
@@ -7,10 +9,9 @@ use App\Form\AdType;
 use App\Repository\AdRepository;
 use App\Service\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class AdminAdController extends AbstractController
 {
@@ -21,7 +22,7 @@ class AdminAdController extends AbstractController
         $pagination->setPage($page);
 
         return $this->render('admin/ad/index.html.twig', [
-            'pagination' => $pagination
+            'pagination' => $pagination,
         ]);
     }
 
@@ -36,12 +37,13 @@ class AdminAdController extends AbstractController
             $manager->persist($ad);
             $manager->flush();
 
-            $this->addFlash('success', "L'annonce <strong>{$ad->getTitle()}</strong> a bien été enregistrée !");;
+            $this->addFlash('success', "L'annonce <strong>{$ad->getTitle()}</strong> a bien été enregistrée !");
+            ;
         }
 
         return $this->render('admin/ad/edit.html.twig', [
             'ad' => $ad,
-            'form' => $form->createView()
+            'form' => $form->createView(),
         ]);
     }
 

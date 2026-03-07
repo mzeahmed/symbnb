@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Ad;
@@ -8,11 +10,11 @@ use App\Entity\Comment;
 use App\Form\BookingType;
 use App\Form\CommentType;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class BookingController extends AbstractController
 {
@@ -45,7 +47,7 @@ class BookingController extends AbstractController
 
         return $this->render('booking/book.html.twig', [
             'ad' => $ad,
-            'form' => $form->createView()
+            'form' => $form->createView(),
         ]);
     }
 
@@ -70,7 +72,7 @@ class BookingController extends AbstractController
 
         return $this->render('booking/show.html.twig', [
             'booking' => $booking,
-            'form' => $form->createView()
+            'form' => $form->createView(),
         ]);
     }
 }

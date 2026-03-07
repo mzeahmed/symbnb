@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Entity\Booking;
 use App\Form\AdminBookingType;
 use App\Service\PaginationService;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class AdminBookingController extends AbstractController
 {
@@ -21,7 +23,7 @@ class AdminBookingController extends AbstractController
         $pagination->setPage($page);
 
         return $this->render('admin/booking/index.html.twig', [
-            'pagination' => $pagination
+            'pagination' => $pagination,
         ]);
     }
 
@@ -45,7 +47,7 @@ class AdminBookingController extends AbstractController
 
         return $this->render('admin/booking/edit.html.twig', [
             'form' => $form->createView(),
-            'booking' => $booking
+            'booking' => $booking,
         ]);
     }
 
@@ -55,7 +57,7 @@ class AdminBookingController extends AbstractController
         $manager->remove($booking);
         $manager->flush();
 
-        $this->addFlash('success', "La réservation a bien été supprimée");
+        $this->addFlash('success', 'La réservation a bien été supprimée');
 
         return $this->redirectToRoute('admin_booking_index');
     }

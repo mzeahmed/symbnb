@@ -1,57 +1,45 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\CommentRepository;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\CommentRepository")
- * @ORM\HasLifecycleCallbacks()
- */
+#[ORM\Entity(repositoryClass: CommentRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Comment
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
+
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(type: 'integer')]
+    private ?int $rating = null;
+
+    #[ORM\Column(type: 'text')]
+    private ?string $content = null;
+
+    #[ORM\ManyToOne(targetEntity: Ad::class, inversedBy: 'comments')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Ad $ad = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'comments')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $author = null;
 
     /**
-     * @ORM\Column(type="datetime")
-     */
-    private $createdAt;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $rating;
-
-    /**
-     * @ORM\Column(type="text")
-     */
-    private $content;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Ad", inversedBy="comments")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $ad;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\user", inversedBy="comments")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $author;
-
-    /**
-     * Permet de mettre en lace la date de création
-     *
-     * @ORM\PrePersist()
+     * Set the creation date
      *
      * @throws \Exception
      * @return void
      */
+    #[ORM\PrePersist]
     public function prePersist()
     {
         if (empty($this->createdAt)) {

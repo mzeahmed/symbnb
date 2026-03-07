@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Repository\AdRepository;
@@ -15,7 +17,7 @@ class HomeController extends AbstractController
     {
         return $this->render('home.html.twig', [
             'ads' => $adRepo->findBestAds(3),
-            'users' => $userRepo->findBestUsers(4)
+            'users' => $userRepo->findBestUsers(4),
         ]);
     }
 }

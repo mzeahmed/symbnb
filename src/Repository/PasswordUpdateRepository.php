@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Entity\PasswordUpdate;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method PasswordUpdate|null find($id, $lockMode = null, $lockVersion = null)
@@ -19,9 +21,9 @@ class PasswordUpdateRepository extends ServiceEntityRepository
         parent::__construct($registry, PasswordUpdate::class);
     }
 
-//    /**
-//     * @return PasswordUpdate[] Returns an array of PasswordUpdate objects
-//     */
+    //    /**
+    //     * @return PasswordUpdate[] Returns an array of PasswordUpdate objects
+    //     */
     /*
     public function findByExampleField($value)
     {

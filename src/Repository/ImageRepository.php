@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Entity\Image;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method Image|null find($id, $lockMode = null, $lockVersion = null)
@@ -19,9 +21,9 @@ class ImageRepository extends ServiceEntityRepository
         parent::__construct($registry, Image::class);
     }
 
-//    /**
-//     * @return Image[] Returns an array of Image objects
-//     */
+    //    /**
+    //     * @return Image[] Returns an array of Image objects
+    //     */
     /*
     public function findByExampleField($value)
     {

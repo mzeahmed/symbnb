@@ -7,6 +7,7 @@ NO_COLOR=\033[0m
 DOCKER = docker compose
 PHP = $(DOCKER) exec php
 CONSOLE = $(PHP) php bin/console
+COMPOSER = $(DOCKER) exec php composer
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -49,3 +50,11 @@ reset-db: ## Reset the database
 	$(PHP) bin/console doctrine:database:create
 	$(PHP) bin/console doctrine:migrations:migrate
 	$(PHP) bin/console doctrine:fixtures:load
+
+pint: ## Run Pint
+	@echo "$(GREEN)Running Pint$(NO_COLOR)"
+	$(COMPOSER) run lint
+
+pintf: ## Run Pint and fix
+	@echo "$(GREEN)Running Pint and fixing$(NO_COLOR)"
+	$(COMPOSER) run lint:fix

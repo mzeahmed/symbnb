@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repository;
 
 use App\Entity\Ad;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method Ad|null find($id, $lockMode = null, $lockVersion = null)
@@ -37,9 +39,9 @@ class AdRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-//    /**
-//     * @return Ad[] Returns an array of Ad objects
-//     */
+    //    /**
+    //     * @return Ad[] Returns an array of Ad objects
+    //     */
     /*
     public function findByExampleField($value)
     {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service;
 
 use Twig\Environment;
@@ -104,7 +106,7 @@ class PaginationService
         $this->twig->display($this->templatePath, [
             'page' => $this->currentPage,
             'pages' => $this->getPages(),
-            'route' => $this->route
+            'route' => $this->route,
         ]);
     }
 

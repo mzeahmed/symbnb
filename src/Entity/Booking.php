@@ -1,73 +1,56 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use phpDocumentor\Reflection\Types\Array_;
+use App\Repository\BookingRepository;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\BookingRepository")
- * @ORM\HasLifecycleCallbacks()
- */
+#[ORM\Entity(repositoryClass: BookingRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Booking
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'bookings')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $booker = null;
+
+    #[ORM\ManyToOne(targetEntity: Ad::class, inversedBy: 'bookings')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Ad $ad = null;
+
+    #[ORM\Column(type: 'datetime')]
+    #[Assert\Date(message: 'Warning, the arrival date must be in the correct format!')]
+    #[Assert\GreaterThan(value: 'today', message: 'The arrival date must be later than today', groups: ['front'])]
+    private ?\DateTimeInterface $startDate = null;
+
+    #[ORM\Column(type: 'datetime')]
+    #[Assert\Date(message: 'Warning, the departure date must be in the correct format!')]
+    #[Assert\GreaterThan(propertyPath: 'startDate', message: 'The departure date must be later than the arrival date')]
+    private ?\DateTimeInterface $endDate = null;
+
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\Column(type: 'float')]
+    private ?float $amount = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $comment = null;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="bookings")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $booker;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Ad", inversedBy="bookings")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $ad;
-
-    /**
-     * @ORM\Column(type="datetime")
-     * @Assert\Date(message="Attention, la date d'arrivée doit être au bon format !")
-     * @Assert\GreaterThan("today", message="La date d'arriveé doit être ultérieur à la date d'aujourd'hui", groups={"front"})
-     */
-    private $startDate;
-
-    /**
-     * @ORM\Column(type="datetime")
-     * @Assert\Date(message="Attention, la date de départ doit être au bon format !")
-     * @Assert\GreaterThan(propertyPath="startDate", message="La date de départ doit être plus éloignée que la date d'arrivée")
-     */
-    private $endDate;
-
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $createdAt;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    private $amount;
-
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    private $comment;
-
-
-    /**
-     * Callback appelé à chaque fois qu'on créé et modifie une réservation
+     * Callback called each time a booking is created or modified
      *
-     * @ORM\PrePersist()
-     * @ORM\PreUpdate()
      * @throws \Exception
      */
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
     public function prePersist()
     {
         if (empty($this->createdAt)) {
@@ -75,44 +58,46 @@ class Booking
         }
 
         if (empty($this->amount)) {
-            // prix del'annonce * nombre de jour
+            // ad price * number of days
             $this->amount = $this->ad->getPrice() * $this->getDuration();
         }
     }
 
     /**
-     * Permet de savoir si une journée est disponible pour la réservation
+     * Check if a day is available for booking
      *
      * @return bool
      * @throws \Exception
      */
     public function isBookableDates(): bool
     {
-        // 1) Il faut connaitre les dates qui sont impossoble pour l'annonce
+        // 1) Get the unavailable dates for the ad
         $notAvailableDays = $this->ad->getNotAvailableDays();
 
-        // 2) Il faut commparer les dates choisies avec les dates impossible
+        // 2) Compare the chosen dates with the unavailable dates
         $bookingDays = $this->getDays();
 
         $formatDay = (function ($day) {
             return $day->format('Y-m-d');
         });
 
-        // Tableau des chaines de caracteres de mes journées
+        // Array of date strings for my booking days
         $days = array_map($formatDay, $bookingDays);
         $notAvailable = array_map($formatDay, $notAvailableDays);
 
-        foreach ($days as $day){
-            if (array_search($day, $notAvailable) !== false) return false;
+        foreach ($days as $day) {
+            if (array_search($day, $notAvailable) !== false) {
+                return false;
+            }
         }
 
         return true;
     }
 
     /**
-     * Permet de récupérer un tableau des journés qui correspondent à ma réservation
+     * Get an array of days corresponding to the booking
      *
-     * @return  \DateTime[] Un tableau d'objets DataTime représentant les jours de ma réservation
+     * @return  \DateTime[] An array of DateTime objects representing the booking days
      * @throws \Exception
      */
     public function getDays(): array
@@ -129,13 +114,14 @@ class Booking
     }
 
     /**
-     * Calcul du nombre de jour
+     * Calculate the number of days
      *
      * @return mixed
      */
     public function getDuration()
     {
         $diff = $this->endDate->diff($this->startDate);
+
         return $diff->days;
     }
 

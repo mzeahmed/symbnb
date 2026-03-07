@@ -1,17 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Form;
 
 use App\Entity\Booking;
-use App\Form\DataTransformer\FrenchToDateTimeTransformer;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use App\Form\DataTransformer\FrenchToDateTimeTransformer;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class BookingType extends ApplicationType
 {
-
     private $transformer;
 
     public function __construct(FrenchToDateTimeTransformer $transformer)
@@ -27,15 +28,15 @@ class BookingType extends ApplicationType
                 TextType::class,
                 $this->getConfiguration(
                     "Date d'arrivée",
-                    "La date à laquelle vous comptez arriver"
+                    'La date à laquelle vous comptez arriver'
                 )
             )
             ->add(
                 'endDate',
                 TextType::class,
                 $this->getConfiguration(
-                    "Date de départ",
-                    "La date à laquelle vous quittez les lieux"
+                    'Date de départ',
+                    'La date à laquelle vous quittez les lieux'
                 )
             )
             ->add(
@@ -44,7 +45,7 @@ class BookingType extends ApplicationType
                 $this->getConfiguration(
                     false,
                     "Si vous avez un commentaire, n'hesitez pas à en faire part",
-                    ["required" => false]
+                    ['required' => false]
                 )
             );
 
@@ -58,8 +59,8 @@ class BookingType extends ApplicationType
             'data_class' => Booking::class,
             'validation_groups' => [
                 'Default',
-                'front'
-            ]
+                'front',
+            ],
         ]);
     }
 }

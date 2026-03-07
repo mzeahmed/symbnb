@@ -1,39 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ImageRepository;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\ImageRepository")
- */
+#[ORM\Entity(repositoryClass: ImageRepository::class)]
 class Image
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\Url()
-     */
-    private $url;
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\Url]
+    private ?string $url = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\Length(min=10, minMessage="Le titre de l'image doit faire au moins 10 caractères")
-     */
-    private $caption;
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\Length(min: 10, minMessage: 'The image title must be at least 10 characters')]
+    private ?string $caption = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Ad", inversedBy="images")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $ad;
+    #[ORM\ManyToOne(targetEntity: Ad::class, inversedBy: 'images')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Ad $ad = null;
 
     public function getId(): ?int
     {

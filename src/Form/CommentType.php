@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Form;
 
 use App\Entity\Comment;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class CommentType extends ApplicationType
 {
@@ -16,18 +18,18 @@ class CommentType extends ApplicationType
             ->add(
                 'rating',
                 IntegerType::class,
-                $this->getConfiguration("Note sur 5", "Veuillez inquer votre note de 0 à 5", [
+                $this->getConfiguration('Note sur 5', 'Veuillez inquer votre note de 0 à 5', [
                     'attr' => [
                         'min' => 0,
                         'max' => 5,
-                        'step' => 1
-                    ]
+                        'step' => 1,
+                    ],
                 ])
             )
             ->add(
                 'content',
                 TextareaType::class,
-                $this->getConfiguration("Votre avis / témoignage", "N'hesitez pas à être tres precis, cela aidera nos futur voyageur")
+                $this->getConfiguration('Votre avis / témoignage', "N'hesitez pas à être tres precis, cela aidera nos futur voyageur")
             );
     }
 

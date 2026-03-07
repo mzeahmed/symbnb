@@ -1,91 +1,65 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use Cocur\Slugify\Slugify;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Repository\AdRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\AdRepository")
- * @ORM\HasLifecycleCallbacks
- * @UniqueEntity(
- *     fields={"title"},
- *     message="Une autre annonce possède déjà ce titre , merci de le modifier"
- * )
- */
+#[ORM\Entity(repositoryClass: AdRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[UniqueEntity(fields: ['title'], message: 'Another ad already has this title, please modify it')]
 class Ad
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\Length(min=10, max=255, minMessage="Le titre doit faire plus de 10 caractères !", maxMessage="Le titre ne peut pas faire plus de 255 caractères !")
-     */
-    private ?string $title;
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\Length(min: 10, max: 255, minMessage: 'The title must be more than 10 characters!', maxMessage: 'The title cannot be more than 255 characters!')]
+    private ?string $title = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private ?string $slug;
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $slug = null;
 
-    /**
-     * @ORM\Column(type="float")
-     */
-    private ?float $price;
+    #[ORM\Column(type: 'float')]
+    private ?float $price = null;
 
-    /**
-     * @ORM\Column(type="text")
-     * @Assert\Length(min=20, minMessage="Votre introduction doit faire plus de 20 caractères !")
-     */
-    private ?string $introduction;
+    #[ORM\Column(type: 'text')]
+    #[Assert\Length(min: 20, minMessage: 'Your introduction must be more than 20 characters!')]
+    private ?string $introduction = null;
 
-    /**
-     * @ORM\Column(type="text")
-     * @Assert\Length(min=100, minMessage="Votre description doit faire moins de 100 caractères !")
-     */
-    private ?string $content;
+    #[ORM\Column(type: 'text')]
+    #[Assert\Length(min: 100, minMessage: 'Your description must be at least 100 characters!')]
+    private ?string $content = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\Url()
-     */
-    private ?string $coverImage;
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\Url]
+    private ?string $coverImage = null;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private ?int $rooms;
+    #[ORM\Column(type: 'integer')]
+    private ?int $rooms = null;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Image", mappedBy="ad", orphanRemoval=true)
-     * @Assert\Valid()
-     */
-    private $images;
+    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'ad', orphanRemoval: true)]
+    #[Assert\Valid]
+    private Collection $images;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="ads")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private ?User $author;
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'ads')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $author = null;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Booking", mappedBy="ad")
-     */
-    private $bookings;
+    #[ORM\OneToMany(targetEntity: Booking::class, mappedBy: 'ad')]
+    private Collection $bookings;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Comment", mappedBy="ad", orphanRemoval=true)
-     */
-    private $comments;
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'ad', orphanRemoval: true)]
+    private Collection $comments;
 
     public function __construct()
     {
@@ -95,13 +69,12 @@ class Ad
     }
 
     /**
-     * Initialise les slugs automatiquement en fonction des titres
-     *
-     * @ORM\PrePersist
-     * @ORM\PreUpdate
+     * Initialize slugs automatically based on titles
      *
      * @return  void
      */
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
     public function initilizeSlug()
     {
         if (empty($this->slug)) {
@@ -111,7 +84,7 @@ class Ad
     }
 
     /**
-     * Permet de récuperer le commentaire d'un auteur par rapport à une annonce
+     * Get a comment from an author for this ad
      *
      * @param User $author
      *
@@ -120,34 +93,38 @@ class Ad
     public function getCommentFromAuthor(User $author): mixed
     {
         foreach ($this->comments as $comment) {
-            if ($comment->getAuthor() === $author) return $comment;
+            if ($comment->getAuthor() === $author) {
+                return $comment;
+            }
         }
 
         return null;
     }
 
     /**
-     * Permet d'obtenir la moyenne globale des notes pour cette annonce
+     * Get the overall average rating for this ad
      *
      * @return float|int
      */
     public function getAvgRatings()
     {
-        // Calculer la somme des notations
+        // Calculate the sum of ratings
         $sum = array_reduce($this->comments->toArray(), function ($total, $comment) {
             return $total + $comment->getRating();
         }, 0);
 
-        // Faire la division pour avoir la moyenne
-        if (count($this->comments) > 0) return $sum / count($this->comments);
+        // Divide to get the average
+        if (count($this->comments) > 0) {
+            return $sum / count($this->comments);
+        }
 
         return 0;
     }
 
     /**
-     * Permet d'obtenir un tableau des jours qui ne sont pas disponibles pour cette annonce
+     * Get an array of days that are not available for this ad
      *
-     * @return array Un tableau d'objets DateTime representant les jours d'oocupation
+     * @return array An array of DateTime objects representing occupied days
      * @throws \Exception
      */
     public function getNotAvailableDays(): array
@@ -155,7 +132,7 @@ class Ad
         $notAvailableDays = [];
 
         foreach ($this->bookings as $booking) {
-            // calculer les jours qui se trouvent entre la date d'arrivée et de départ
+            // Calculate the days between arrival and departure dates
             $resultat = range(
                 $booking->getStartDate()->getTimeStamp(),
                 $booking->getEndDate()->getTimestamp(),
