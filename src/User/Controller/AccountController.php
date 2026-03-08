@@ -4,23 +4,25 @@ declare(strict_types=1);
 
 namespace App\User\Controller;
 
-use App\Entity\PasswordUpdate;
 use App\Entity\User;
+use App\Entity\PasswordUpdate;
 use App\User\Form\AccountType;
-use App\User\Form\PasswordUpdateType;
-use App\User\Form\RegistrationType;
 use App\User\Service\UserService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\User\Form\RegistrationType;
+use App\User\Form\PasswordUpdateType;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class AccountController extends AbstractController
 {
-    public function __construct(private readonly UserService $userService) {}
+    public function __construct(private readonly UserService $userService)
+    {
+    }
 
     #[Route('/login', name: 'account_login')]
     public function login(AuthenticationUtils $utils): Response
@@ -35,7 +37,9 @@ class AccountController extends AbstractController
     }
 
     #[Route('/logout', name: 'account_logout')]
-    public function logout(): void {}
+    public function logout(): void
+    {
+    }
 
     #[Route('/register', name: 'account_register')]
     public function register(Request $request): Response
@@ -47,7 +51,7 @@ class AccountController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->userService->register($user);
 
-            $this->addFlash('success', 'Votre compte a bien été créé ! Vous pouvez maintenant vous connecter !');
+            $this->addFlash('success', 'Your account has been created! You can now log in!');
 
             return $this->redirectToRoute('account_login');
         }
@@ -68,7 +72,7 @@ class AccountController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->userService->updateProfile($user);
-            $this->addFlash('success', 'Les données du profil ont été modifiées avec succès !');
+            $this->addFlash('success', 'Profile data has been updated successfully!');
         }
 
         return $this->render('account/profile.html.twig', [
@@ -88,10 +92,10 @@ class AccountController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if (!$this->userService->isCurrentPassword($user, $passwordUpdate->getOldPassword())) {
-                $form->get('oldPassword')->addError(new FormError("Le mot de passe que vous avez tapé n'est pas votre mot de passe actuel !"));
+                $form->get('oldPassword')->addError(new FormError('The password you entered is not your current password!'));
             } else {
                 $this->userService->updatePassword($user, $passwordUpdate->getNewPassword());
-                $this->addFlash('success', 'Votre mot de passe a bien été modifié.');
+                $this->addFlash('success', 'Your password has been updated successfully.');
 
                 return $this->redirectToRoute('homepage');
             }

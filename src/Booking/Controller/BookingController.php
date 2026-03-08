@@ -4,22 +4,24 @@ declare(strict_types=1);
 
 namespace App\Booking\Controller;
 
-use App\Booking\Form\BookingType;
-use App\Booking\Service\BookingService;
-use App\Comment\Form\CommentType;
 use App\Entity\Ad;
 use App\Entity\Booking;
 use App\Entity\Comment;
+use App\Booking\Form\BookingType;
+use App\Comment\Form\CommentType;
+use App\Booking\Service\BookingService;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class BookingController extends AbstractController
 {
-    public function __construct(private readonly BookingService $bookingService) {}
+    public function __construct(private readonly BookingService $bookingService)
+    {
+    }
 
     #[Route('/ads/{slug}/book', name: 'booking_create')]
     #[IsGranted('ROLE_USER')]
@@ -33,7 +35,7 @@ class BookingController extends AbstractController
             $created = $this->bookingService->createBooking($booking, $ad, $this->getUser());
 
             if (!$created) {
-                $this->addFlash('warning', 'Les dates choisies ne sont pas disponibles.');
+                $this->addFlash('warning', 'The selected dates are not available.');
             } else {
                 return $this->redirectToRoute('booking_show', ['id' => $booking->getId(), 'withAlert' => true]);
             }
@@ -59,7 +61,7 @@ class BookingController extends AbstractController
             $manager->persist($comment);
             $manager->flush();
 
-            $this->addFlash('success', 'Votre commentaire a bien été pris en compte.');
+            $this->addFlash('success', 'Your comment has been submitted successfully.');
         }
 
         return $this->render('booking/show.html.twig', [

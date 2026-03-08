@@ -10,7 +10,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class AdService
 {
-    public function __construct(private readonly EntityManagerInterface $manager) {}
+    public function __construct(private readonly EntityManagerInterface $manager)
+    {
+    }
 
     public function save(Ad $ad, ?UserInterface $author = null): void
     {

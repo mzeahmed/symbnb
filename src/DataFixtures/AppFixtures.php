@@ -119,7 +119,6 @@ class AppFixtures extends Fixture
                         ->setAd($ad)
                         ->setStartDate($startDate)
                         ->setEndDate($endDate)
-                        ->setCreatedAt($createdAt)
                         ->setAmount($amount)
                         ->setComment($comment);
 

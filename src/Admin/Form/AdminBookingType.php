@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Admin\Form;
 
 use App\Entity\Ad;
-use App\Entity\Booking;
 use App\Entity\User;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use App\Entity\Booking;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 
 class AdminBookingType extends AbstractType
 {
@@ -23,7 +23,7 @@ class AdminBookingType extends AbstractType
             ->add('comment')
             ->add('booker', EntityType::class, [
                 'class' => User::class,
-                'choice_label' => fn(User $user) => $user->getFirstName() . ' ' . strtoupper($user->getLastName()),
+                'choice_label' => fn (User $user) => $user->getFirstName() . ' ' . strtoupper($user->getLastName()),
             ])
             ->add('ad', EntityType::class, [
                 'class' => Ad::class,

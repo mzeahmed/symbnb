@@ -13,19 +13,32 @@ class Image
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(length: 255)]
     #[Assert\Url]
+    #[Assert\NotBlank]
     private ?string $url = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\Length(min: 10, minMessage: 'The image title must be at least 10 characters')]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Length(min: 3)]
     private ?string $caption = null;
 
+    /**
+     * Display order within the listing gallery (0 = first).
+     */
+    #[ORM\Column(type: 'smallint')]
+    private int $position = 0;
+
+    /**
+     * The primary image is used as the listing cover when no explicit coverImage is set.
+     */
+    #[ORM\Column]
+    private bool $isPrimary = false;
+
     #[ORM\ManyToOne(targetEntity: Ad::class, inversedBy: 'images')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Ad $ad = null;
 
     public function getId(): ?int
@@ -41,7 +54,6 @@ class Image
     public function setUrl(string $url): self
     {
         $this->url = $url;
-
         return $this;
     }
 
@@ -50,10 +62,31 @@ class Image
         return $this->caption;
     }
 
-    public function setCaption(string $caption): self
+    public function setCaption(?string $caption): self
     {
         $this->caption = $caption;
+        return $this;
+    }
 
+    public function getPosition(): int
+    {
+        return $this->position;
+    }
+
+    public function setPosition(int $position): self
+    {
+        $this->position = $position;
+        return $this;
+    }
+
+    public function isPrimary(): bool
+    {
+        return $this->isPrimary;
+    }
+
+    public function setIsPrimary(bool $isPrimary): self
+    {
+        $this->isPrimary = $isPrimary;
         return $this;
     }
 
@@ -65,7 +98,6 @@ class Image
     public function setAd(?Ad $ad): self
     {
         $this->ad = $ad;
-
         return $this;
     }
 }

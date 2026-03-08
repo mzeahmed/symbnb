@@ -13,7 +13,8 @@ class UserService
     public function __construct(
         private readonly EntityManagerInterface $manager,
         private readonly UserPasswordHasherInterface $hasher,
-    ) {}
+    ) {
+    }
 
     public function register(User $user): void
     {

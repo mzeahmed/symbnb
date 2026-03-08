@@ -11,7 +11,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class BookingService
 {
-    public function __construct(private readonly EntityManagerInterface $manager) {}
+    public function __construct(private readonly EntityManagerInterface $manager)
+    {
+    }
 
     public function createBooking(Booking $booking, Ad $ad, UserInterface $user): bool
     {

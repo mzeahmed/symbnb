@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace App\Ad\Controller;
 
+use App\Entity\Ad;
 use App\Ad\Form\AdType;
 use App\Ad\Service\AdService;
-use App\Entity\Ad;
 use App\Repository\AdRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class AdController extends AbstractController
 {
-    public function __construct(private readonly AdService $adService) {}
+    public function __construct(private readonly AdService $adService)
+    {
+    }
 
     #[Route('/ads', name: 'ads_index')]
     public function index(AdRepository $repo): Response
@@ -37,7 +39,7 @@ class AdController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->adService->save($ad, $this->getUser());
 
-            $this->addFlash('success', "L'annonce <strong>{$ad->getTitle()}</strong> a bien été enregistrée !");
+            $this->addFlash('success', "The listing <strong>{$ad->getTitle()}</strong> has been saved successfully!");
 
             return $this->redirectToRoute('ads_show', ['slug' => $ad->getSlug()]);
         }
@@ -52,7 +54,7 @@ class AdController extends AbstractController
     public function edit(Ad $ad, Request $request): Response
     {
         if ($this->getUser() !== $ad->getAuthor()) {
-            throw $this->createAccessDeniedException('Cette annonce ne vous appartient pas.');
+            throw $this->createAccessDeniedException('This listing does not belong to you.');
         }
 
         $form = $this->createForm(AdType::class, $ad);
@@ -61,7 +63,7 @@ class AdController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->adService->save($ad);
 
-            $this->addFlash('success', "Les modifications de l'annonce <strong>{$ad->getTitle()}</strong> ont bien été enregistrées !");
+            $this->addFlash('success', "The changes to the listing <strong>{$ad->getTitle()}</strong> have been saved successfully!");
 
             return $this->redirectToRoute('ads_show', ['slug' => $ad->getSlug()]);
         }
@@ -83,12 +85,12 @@ class AdController extends AbstractController
     public function delete(Ad $ad): Response
     {
         if ($this->getUser() !== $ad->getAuthor()) {
-            throw $this->createAccessDeniedException("Vous n'avez pas le droit d'accéder à cette ressource.");
+            throw $this->createAccessDeniedException('You do not have permission to access this resource.');
         }
 
         $this->adService->delete($ad);
 
-        $this->addFlash('success', "L'annonce <strong>{$ad->getTitle()}</strong> a bien été supprimée.");
+        $this->addFlash('success', "The listing <strong>{$ad->getTitle()}</strong> has been deleted successfully.");
 
         return $this->redirectToRoute('ads_index');
     }

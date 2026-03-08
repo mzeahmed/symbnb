@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Shared\Twig;
 
-use Symfony\Component\HttpFoundation\RequestStack;
-use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
+use Twig\Extension\AbstractExtension;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class AppExtension extends AbstractExtension
 {
-    public function __construct(private readonly RequestStack $requestStack) {}
+    public function __construct(private readonly RequestStack $requestStack)
+    {
+    }
 
     public function getFunctions(): array
     {
@@ -23,10 +25,8 @@ class AppExtension extends AbstractExtension
     {
         $currentRoute = $this->requestStack->getCurrentRequest()->get('_route');
 
-        foreach ($routes as $route) {
-            if ($route === $currentRoute) {
-                return 'active';
-            }
+        if (in_array($currentRoute, $routes, true)) {
+            return 'active';
         }
 
         return '';

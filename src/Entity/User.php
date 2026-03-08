@@ -17,46 +17,67 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
 #[ORM\HasLifecycleCallbacks]
-#[UniqueEntity(fields: ['email'], message: 'Another user has already registered with this email address, please modify it!')]
+#[UniqueEntity(fields: ['email'], message: 'This email address is already in use.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\NotBlank(message: 'You must enter your first name!')]
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Please enter your first name.')]
     private ?string $firstName = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\NotBlank(message: 'You must enter your last name!')]
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Please enter your last name.')]
     private ?string $lastName = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\Email(message: 'Please enter a valid email!')]
+    #[ORM\Column(length: 255, unique: true)]
+    #[Assert\Email(message: 'Please enter a valid email address.')]
     private ?string $email = null;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    #[Assert\Url(message: 'Please provide a valid URL for your avatar!')]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(message: 'Please provide a valid URL for your avatar.')]
     private ?string $picture = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(length: 255)]
     private ?string $hash = null;
 
-    #[Assert\EqualTo(propertyPath: 'hash', message: 'You have not correctly confirmed your password!')]
+    #[Assert\EqualTo(propertyPath: 'hash', message: 'You did not correctly confirm your password.')]
     public ?string $passwordConfirm = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    // #[Assert\Length(min: 10, minMessage: 'Your introduction must be at least 10 characters!')]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $introduction = null;
 
-    #[ORM\Column(type: 'text')]
-    // #[Assert\Length(min: 100, minMessage: 'Your description must be at least 100 characters!')]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $slug = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $phone = null;
+
+    /**
+     * Whether the user can publish listings (host mode)
+     */
+    #[ORM\Column]
+    private bool $isHost = false;
+
+    /**
+     * Whether the email address has been verified
+     */
+    #[ORM\Column]
+    private bool $isVerified = false;
+
+    #[ORM\Column]
+    private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    // ── Relations ────────────────────────────────────────────────────────────
 
     #[ORM\OneToMany(targetEntity: Ad::class, mappedBy: 'author')]
     private Collection $ads;
@@ -70,33 +91,75 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'author', orphanRemoval: true)]
     private Collection $comments;
 
-    public function getFullName()
-    {
-        return "{$this->firstName} {$this->lastName}";
-    }
-
-    /**
-     * Initialize slugs automatically based on firstName and lastName
-     *
-     * @return  void
-     */
-    #[ORM\PrePersist]
-    #[ORM\PreUpdate]
-    public function initilizeSlug()
-    {
-        if (empty($this->slug)) {
-            $slugify = new Slugify();
-            $this->slug = $slugify->slugify($this->firstName . ' ' . $this->lastName);
-        }
-    }
+    #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $favorites;
 
     public function __construct()
     {
+        $this->createdAt = new \DateTimeImmutable();
         $this->ads = new ArrayCollection();
         $this->userRoles = new ArrayCollection();
         $this->bookings = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->favorites = new ArrayCollection();
     }
+
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function initializeSlug(): void
+    {
+        if (empty($this->slug)) {
+            $this->slug = (new Slugify())->slugify($this->firstName . ' ' . $this->lastName);
+        }
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    // ── Domain helpers ────────────────────────────────────────────────────────
+
+    public function getFullName(): string
+    {
+        return "{$this->firstName} {$this->lastName}";
+    }
+
+    public function hasFavorited(Ad $ad): bool
+    {
+        foreach ($this->favorites as $favorite) {
+            if ($favorite->getAd() === $ad) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ── UserInterface ─────────────────────────────────────────────────────────
+
+    public function getRoles(): array
+    {
+        $roles = $this->userRoles->map(fn (Role $role) => $role->getTitle())->toArray();
+        $roles[] = 'ROLE_USER';
+
+        if ($this->isHost) {
+            $roles[] = 'ROLE_HOST';
+        }
+
+        return array_unique($roles);
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->hash;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+
+    public function eraseCredentials(): void
+    {
+    }
+
+    // ── Getters / Setters ─────────────────────────────────────────────────────
 
     public function getId(): ?int
     {
@@ -111,7 +174,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFirstName(string $firstName): self
     {
         $this->firstName = $firstName;
-
         return $this;
     }
 
@@ -123,7 +185,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastName(string $lastName): self
     {
         $this->lastName = $lastName;
-
         return $this;
     }
 
@@ -135,7 +196,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): self
     {
         $this->email = $email;
-
         return $this;
     }
 
@@ -147,7 +207,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPicture(?string $picture): self
     {
         $this->picture = $picture;
-
         return $this;
     }
 
@@ -159,7 +218,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setHash(string $hash): self
     {
         $this->hash = $hash;
-
         return $this;
     }
 
@@ -168,10 +226,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->introduction;
     }
 
-    public function setIntroduction(string $introduction): self
+    public function setIntroduction(?string $introduction): self
     {
         $this->introduction = $introduction;
-
         return $this;
     }
 
@@ -180,10 +237,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->description;
     }
 
-    public function setDescription(string $description): self
+    public function setDescription(?string $description): self
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -195,13 +251,52 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
-
         return $this;
     }
 
-    /**
-     * @return Collection|Ad[]
-     */
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(?string $phone): self
+    {
+        $this->phone = $phone;
+        return $this;
+    }
+
+    public function isHost(): bool
+    {
+        return $this->isHost;
+    }
+
+    public function setIsHost(bool $isHost): self
+    {
+        $this->isHost = $isHost;
+        return $this;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): self
+    {
+        $this->isVerified = $isVerified;
+        return $this;
+    }
+
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
     public function getAds(): Collection
     {
         return $this->ads;
@@ -210,64 +305,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function addAd(Ad $ad): self
     {
         if (!$this->ads->contains($ad)) {
-            $this->ads[] = $ad;
+            $this->ads->add($ad);
             $ad->setAuthor($this);
         }
-
         return $this;
     }
 
     public function removeAd(Ad $ad): self
     {
-        if ($this->ads->contains($ad)) {
-            $this->ads->removeElement($ad);
-            // set the owning side to null (unless already changed)
-            if ($ad->getAuthor() === $this) {
-                $ad->setAuthor(null);
-            }
+        if ($this->ads->removeElement($ad) && $ad->getAuthor() === $this) {
+            $ad->setAuthor(null);
         }
-
         return $this;
     }
 
-    public function getRoles(): array
-    {
-        $roles = $this->userRoles->map(function ($role) {
-            return $role->getTitle();
-        })->toArray();
-
-        $roles[] = 'ROLE_USER';
-
-        return $roles;
-    }
-
-    public function getPassword(): ?string
-    {
-        return $this->hash;
-    }
-
-    public function getSalt(): ?string
-    {
-        return null;
-    }
-
-    public function getUsername(): string
-    {
-        return $this->email;
-    }
-
-    public function getUserIdentifier(): string
-    {
-        return $this->email;
-    }
-
-    public function eraseCredentials(): void
-    {
-    }
-
-    /**
-     * @return Collection|Role[]
-     */
     public function getUserRoles(): Collection
     {
         return $this->userRoles;
@@ -276,26 +327,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function addUserRole(Role $userRole): self
     {
         if (!$this->userRoles->contains($userRole)) {
-            $this->userRoles[] = $userRole;
+            $this->userRoles->add($userRole);
             $userRole->addUser($this);
         }
-
         return $this;
     }
 
     public function removeUserRole(Role $userRole): self
     {
-        if ($this->userRoles->contains($userRole)) {
-            $this->userRoles->removeElement($userRole);
+        if ($this->userRoles->removeElement($userRole)) {
             $userRole->removeUser($this);
         }
-
         return $this;
     }
 
-    /**
-     * @return Collection|Booking[]
-     */
     public function getBookings(): Collection
     {
         return $this->bookings;
@@ -304,29 +349,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function addBooking(Booking $booking): self
     {
         if (!$this->bookings->contains($booking)) {
-            $this->bookings[] = $booking;
+            $this->bookings->add($booking);
             $booking->setBooker($this);
         }
-
         return $this;
     }
 
     public function removeBooking(Booking $booking): self
     {
-        if ($this->bookings->contains($booking)) {
-            $this->bookings->removeElement($booking);
-            // set the owning side to null (unless already changed)
-            if ($booking->getBooker() === $this) {
-                $booking->setBooker(null);
-            }
+        if ($this->bookings->removeElement($booking) && $booking->getBooker() === $this) {
+            $booking->setBooker(null);
         }
-
         return $this;
     }
 
-    /**
-     * @return Collection|Comment[]
-     */
     public function getComments(): Collection
     {
         return $this->comments;
@@ -335,23 +371,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function addComment(Comment $comment): self
     {
         if (!$this->comments->contains($comment)) {
-            $this->comments[] = $comment;
+            $this->comments->add($comment);
             $comment->setAuthor($this);
         }
-
         return $this;
     }
 
     public function removeComment(Comment $comment): self
     {
-        if ($this->comments->contains($comment)) {
-            $this->comments->removeElement($comment);
-            // set the owning side to null (unless already changed)
-            if ($comment->getAuthor() === $this) {
-                $comment->setAuthor(null);
-            }
+        if ($this->comments->removeElement($comment) && $comment->getAuthor() === $this) {
+            $comment->setAuthor(null);
         }
+        return $this;
+    }
 
+    public function getFavorites(): Collection
+    {
+        return $this->favorites;
+    }
+
+    public function addFavorite(Favorite $favorite): self
+    {
+        if (!$this->favorites->contains($favorite)) {
+            $this->favorites->add($favorite);
+            $favorite->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeFavorite(Favorite $favorite): self
+    {
+        $this->favorites->removeElement($favorite);
         return $this;
     }
 }

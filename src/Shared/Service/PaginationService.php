@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Service;
 
+use Twig\Environment;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Twig\Environment;
 
 class PaginationService
 {
@@ -36,7 +36,7 @@ class PaginationService
     public function getPages(): int
     {
         if (empty($this->entityClass)) {
-            throw new \Exception("Vous n'avez pas spécifié l'entité sur laquelle nous devons paginer ! Utilisez setEntityClass().");
+            throw new \Exception('You have not specified the entity to paginate on! Use setEntityClass().');
         }
 
         $total = count($this->manager->getRepository($this->entityClass)->findAll());
@@ -47,7 +47,7 @@ class PaginationService
     public function getData(): array
     {
         if (empty($this->entityClass)) {
-            throw new \Exception("Vous n'avez pas spécifié l'entité sur laquelle nous devons paginer ! Utilisez setEntityClass().");
+            throw new \Exception('You have not specified the entity to paginate on! Use setEntityClass().');
         }
 
         $offset = $this->currentPage * $this->limit - $this->limit;

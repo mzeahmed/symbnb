@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Admin\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class AdminAccountController extends AbstractController
@@ -24,5 +24,7 @@ class AdminAccountController extends AbstractController
     }
 
     #[Route('/admin/logout', name: 'admin_account_logout')]
-    public function logout(): void {}
+    public function logout(): void
+    {
+    }
 }

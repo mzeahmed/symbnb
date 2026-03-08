@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Admin\Controller;
 
-use App\Admin\Form\AdminCommentType;
 use App\Entity\Comment;
-use App\Shared\Service\PaginationService;
+use App\Admin\Form\AdminCommentType;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Shared\Service\PaginationService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class AdminCommentController extends AbstractController
 {
@@ -35,7 +35,7 @@ class AdminCommentController extends AbstractController
             $manager->persist($comment);
             $manager->flush();
 
-            $this->addFlash('success', "Le commentaire n°{$comment->getId()} a bien été modifié !");
+            $this->addFlash('success', "Comment #{$comment->getId()} has been updated successfully!");
         }
 
         return $this->render('admin/comment/edit.html.twig', [
@@ -50,7 +50,7 @@ class AdminCommentController extends AbstractController
         $manager->remove($comment);
         $manager->flush();
 
-        $this->addFlash('success', "Le commentaire de {$comment->getAuthor()->getFullName()} a bien été supprimé.");
+        $this->addFlash('success', "The comment by {$comment->getAuthor()->getFullName()} has been deleted successfully.");
 
         return $this->redirectToRoute('admin_comment_index');
     }

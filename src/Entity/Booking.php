@@ -14,7 +14,7 @@ class Booking
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'bookings')]
@@ -25,68 +25,79 @@ class Booking
     #[ORM\JoinColumn(nullable: false)]
     private ?Ad $ad = null;
 
-    #[ORM\Column(type: 'datetime')]
-    #[Assert\Date(message: 'Warning, the arrival date must be in the correct format!')]
-    #[Assert\GreaterThan(value: 'today', message: 'The arrival date must be later than today', groups: ['front'])]
+    /**
+     * Using DATE (not DATETIME) — only the day matters for availability.
+     */
+    #[ORM\Column(type: 'date')]
+    #[Assert\NotNull]
+    #[Assert\GreaterThan(value: 'today', message: 'The arrival date must be later than today.', groups: ['front'])]
     private ?\DateTimeInterface $startDate = null;
 
-    #[ORM\Column(type: 'datetime')]
-    #[Assert\Date(message: 'Warning, the departure date must be in the correct format!')]
-    #[Assert\GreaterThan(propertyPath: 'startDate', message: 'The departure date must be later than the arrival date')]
+    #[ORM\Column(type: 'date')]
+    #[Assert\NotNull]
+    #[Assert\GreaterThan(propertyPath: 'startDate', message: 'The departure date must be after the arrival date.')]
     private ?\DateTimeInterface $endDate = null;
 
-    #[ORM\Column(type: 'datetime')]
-    private ?\DateTimeInterface $createdAt = null;
+    #[ORM\Column]
+    private \DateTimeImmutable $createdAt;
 
-    #[ORM\Column(type: 'float')]
-    private ?float $amount = null;
+    /**
+     * Total price stored as NUMERIC(10,2) for monetary precision.
+     */
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    private ?string $amount = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $comment = null;
 
+    #[ORM\Column(length: 20, enumType: BookingStatus::class)]
+    private BookingStatus $status = BookingStatus::Pending;
+
+    #[ORM\Column]
+    #[Assert\Positive]
+    #[Assert\LessThanOrEqual(value: 50)]
+    private int $guestsCount = 1;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $cancelledAt = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $cancellationReason = null;
+
     /**
-     * Callback called each time a booking is created or modified
-     *
-     * @throws \Exception
+     * One review per booking — nullable because review is written after stay.
      */
+    #[ORM\OneToOne(targetEntity: Comment::class, mappedBy: 'booking', cascade: ['persist', 'remove'])]
+    private ?Comment $review = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
     #[ORM\PrePersist]
     #[ORM\PreUpdate]
-    public function prePersist()
+    public function prePersist(): void
     {
-        if (empty($this->createdAt)) {
-            $this->createdAt = new \DateTime();
-        }
-
-        if (empty($this->amount)) {
-            // ad price * number of days
-            $this->amount = $this->ad->getPrice() * $this->getDuration();
+        if ($this->amount === null || (float) $this->amount === 0.0) {
+            $this->amount = (string) ($this->ad->getPriceAsFloat() * $this->getDuration());
         }
     }
 
+    // ── Domain helpers ────────────────────────────────────────────────────────
+
     /**
-     * Check if a day is available for booking
-     *
-     * @return bool
-     * @throws \Exception
+     * Returns false if any chosen day overlaps an existing confirmed/pending booking.
      */
     public function isBookableDates(): bool
     {
-        // 1) Get the unavailable dates for the ad
-        $notAvailableDays = $this->ad->getNotAvailableDays();
+        $unavailable = array_map(
+            fn (\DateTimeInterface $d) => $d->format('Y-m-d'),
+            $this->ad->getNotAvailableDays()
+        );
 
-        // 2) Compare the chosen dates with the unavailable dates
-        $bookingDays = $this->getDays();
-
-        $formatDay = (function ($day) {
-            return $day->format('Y-m-d');
-        });
-
-        // Array of date strings for my booking days
-        $days = array_map($formatDay, $bookingDays);
-        $notAvailable = array_map($formatDay, $notAvailableDays);
-
-        foreach ($days as $day) {
-            if (array_search($day, $notAvailable) !== false) {
+        foreach ($this->getDays() as $day) {
+            if (in_array($day->format('Y-m-d'), $unavailable, true)) {
                 return false;
             }
         }
@@ -94,35 +105,41 @@ class Booking
         return true;
     }
 
-    /**
-     * Get an array of days corresponding to the booking
-     *
-     * @return  \DateTime[] An array of DateTime objects representing the booking days
-     * @throws \Exception
-     */
+    /** @return \DateTime[] */
     public function getDays(): array
     {
-        $resultat = range(
+        $timestamps = range(
             $this->startDate->getTimestamp(),
             $this->endDate->getTimestamp(),
-            24 * 60 * 60
+            86400
         );
 
-        return array_map(function ($dayTimestamp) {
-            return new \DateTime(date('Y-m-d', $dayTimestamp));
-        }, $resultat);
+        return array_map(
+            fn (int $ts) => new \DateTime(date('Y-m-d', $ts)),
+            $timestamps
+        );
     }
 
-    /**
-     * Calculate the number of days
-     *
-     * @return mixed
-     */
-    public function getDuration()
+    public function getDuration(): int
     {
-        $diff = $this->endDate->diff($this->startDate);
+        return (int) $this->endDate->diff($this->startDate)->days;
+    }
 
-        return $diff->days;
+    public function cancel(string $reason = ''): void
+    {
+        $this->status = BookingStatus::Cancelled;
+        $this->cancelledAt = new \DateTimeImmutable();
+        $this->cancellationReason = $reason ?: null;
+    }
+
+    public function confirm(): void
+    {
+        $this->status = BookingStatus::Confirmed;
+    }
+
+    public function complete(): void
+    {
+        $this->status = BookingStatus::Completed;
     }
 
     public function getId(): ?int
@@ -178,26 +195,19 @@ class Booking
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getAmount(): ?float
+    public function getAmount(): ?string
     {
         return $this->amount;
     }
 
-    public function setAmount(float $amount): self
+    public function setAmount(string | float $amount): self
     {
-        $this->amount = $amount;
+        $this->amount = (string) $amount;
 
         return $this;
     }
@@ -210,6 +220,55 @@ class Booking
     public function setComment(?string $comment): self
     {
         $this->comment = $comment;
+
+        return $this;
+    }
+
+    public function getStatus(): BookingStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(BookingStatus $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getGuestsCount(): int
+    {
+        return $this->guestsCount;
+    }
+
+    public function setGuestsCount(int $guestsCount): self
+    {
+        $this->guestsCount = $guestsCount;
+
+        return $this;
+    }
+
+    public function getCancelledAt(): ?\DateTimeImmutable
+    {
+        return $this->cancelledAt;
+    }
+
+    public function getCancellationReason(): ?string
+    {
+        return $this->cancellationReason;
+    }
+
+    public function getReview(): ?Comment
+    {
+        return $this->review;
+    }
+
+    public function setReview(?Comment $review): self
+    {
+        if ($review !== null && $review->getBooking() !== $this) {
+            $review->setBooking($this);
+        }
+        $this->review = $review;
 
         return $this;
     }

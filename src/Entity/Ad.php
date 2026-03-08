@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use Cocur\Slugify\Slugify;
-use Doctrine\ORM\Mapping as ORM;
 use App\Repository\AdRepository;
+use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -14,46 +14,97 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: AdRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-#[UniqueEntity(fields: ['title'], message: 'Another ad already has this title, please modify it')]
+#[UniqueEntity(fields: ['title'], message: 'A listing with this title already exists.')]
 class Ad
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\Length(min: 10, max: 255, minMessage: 'The title must be more than 10 characters!', maxMessage: 'The title cannot be more than 255 characters!')]
+    #[ORM\Column(length: 255)]
+    #[Assert\Length(min: 10, max: 255)]
     private ?string $title = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $slug = null;
 
-    #[ORM\Column(type: 'float')]
-    private ?float $price = null;
+    /**
+     * Nightly rate stored as NUMERIC(10,2) for monetary precision.
+     */
+    #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
+    #[Assert\Positive(message: 'The price must be greater than 0.')]
+    private ?string $price = null;
 
     #[ORM\Column(type: 'text')]
-    #[Assert\Length(min: 20, minMessage: 'Your introduction must be more than 20 characters!')]
+    #[Assert\Length(min: 20)]
     private ?string $introduction = null;
 
     #[ORM\Column(type: 'text')]
-    #[Assert\Length(min: 100, minMessage: 'Your description must be at least 100 characters!')]
+    #[Assert\Length(min: 100)]
     private ?string $content = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(length: 255)]
     #[Assert\Url]
     private ?string $coverImage = null;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column]
+    #[Assert\Positive]
     private ?int $rooms = null;
 
-    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'ad', orphanRemoval: true)]
-    #[Assert\Valid]
-    private Collection $images;
+    #[ORM\Column]
+    #[Assert\Positive]
+    #[Assert\LessThanOrEqual(value: 50)]
+    private int $maxGuests = 1;
+
+    // ── Location ──────────────────────────────────────────────────────────────
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $address = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $city = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $country = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $latitude = null;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $longitude = null;
+
+    // ── Status ────────────────────────────────────────────────────────────────
+
+    /**
+     * Only published listings appear in search results.
+     */
+    #[ORM\Column]
+    private bool $isPublished = false;
+
+    #[ORM\Column]
+    private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    // ── Relations ─────────────────────────────────────────────────────────────
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'ads')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
+
+    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'ads')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Category $category = null;
+
+    #[ORM\ManyToMany(targetEntity: Amenity::class, inversedBy: 'ads')]
+    #[ORM\JoinTable(name: 'ad_amenity')]
+    private Collection $amenities;
+
+    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'ad', orphanRemoval: true, cascade: ['persist'])]
+    #[Assert\Valid]
+    private Collection $images;
 
     #[ORM\OneToMany(targetEntity: Booking::class, mappedBy: 'ad')]
     private Collection $bookings;
@@ -61,93 +112,91 @@ class Ad
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'ad', orphanRemoval: true)]
     private Collection $comments;
 
+    #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'ad', orphanRemoval: true)]
+    private Collection $favorites;
+
     public function __construct()
     {
+        $this->createdAt = new \DateTimeImmutable();
+        $this->amenities = new ArrayCollection();
         $this->images = new ArrayCollection();
         $this->bookings = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->favorites = new ArrayCollection();
     }
 
-    /**
-     * Initialize slugs automatically based on titles
-     *
-     * @return  void
-     */
     #[ORM\PrePersist]
     #[ORM\PreUpdate]
-    public function initilizeSlug(): void
+    public function initializeSlug(): void
     {
         if (empty($this->slug)) {
-            $slugify = new Slugify();
-            $this->slug = $slugify->slugify($this->title);
+            $this->slug = (new Slugify())->slugify($this->title);
         }
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
-    /**
-     * Get a comment from an author for this ad
-     *
-     * @param User $author
-     *
-     * @return mixed
-     */
-    public function getCommentFromAuthor(User $author): mixed
+    // ── Domain helpers ────────────────────────────────────────────────────────
+
+    public function getCommentFromAuthor(User $author): ?Comment
     {
         foreach ($this->comments as $comment) {
             if ($comment->getAuthor() === $author) {
                 return $comment;
             }
         }
-
         return null;
     }
 
-    /**
-     * Get the overall average rating for this ad
-     *
-     * @return float|int
-     */
-    public function getAvgRatings(): float|int
+    public function getAvgRatings(): float
     {
-        // Calculate the sum of ratings
-        $sum = array_reduce($this->comments->toArray(), function ($total, $comment) {
-            return $total + $comment->getRating();
-        }, 0);
-
-        // Divide to get the average
-        if (count($this->comments) > 0) {
-            return $sum / count($this->comments);
+        $count = count($this->comments);
+        if ($count === 0) {
+            return 0.0;
         }
 
-        return 0;
+        $sum = array_reduce(
+            $this->comments->toArray(),
+            fn (int $carry, Comment $c) => $carry + $c->getRating(),
+            0
+        );
+
+        return round($sum / $count, 1);
     }
 
     /**
-     * Get an array of days that are not available for this ad
+     * Returns all days blocked by confirmed or pending bookings.
      *
-     * @return array An array of DateTime objects representing occupied days
-     * @throws \Exception
+     * @return \DateTimeInterface[]
      */
     public function getNotAvailableDays(): array
     {
-        $notAvailableDays = [];
+        $blocked = [];
 
         foreach ($this->bookings as $booking) {
-            // Calculate the days between arrival and departure dates
-            $resultat = range(
-                $booking->getStartDate()->getTimeStamp(),
+            if ($booking->getStatus() === BookingStatus::Cancelled) {
+                continue;
+            }
+
+            $days = range(
+                $booking->getStartDate()->getTimestamp(),
                 $booking->getEndDate()->getTimestamp(),
-                24 * 60 * 60
+                86400
             );
 
-            $days = array_map(function ($dayTimestamp) {
-                return new \DateTime(date('Y-m-d', $dayTimestamp));
-            }, $resultat);
-
-            $notAvailableDays = array_merge($notAvailableDays, $days);
+            foreach ($days as $ts) {
+                $blocked[] = new \DateTime(date('Y-m-d', $ts));
+            }
         }
 
-        return $notAvailableDays;
+        return $blocked;
     }
+
+    public function getPriceAsFloat(): float
+    {
+        return (float) $this->price;
+    }
+
+    // ── Getters / Setters ─────────────────────────────────────────────────────
 
     public function getId(): ?int
     {
@@ -162,7 +211,6 @@ class Ad
     public function setTitle(string $title): self
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -174,19 +222,17 @@ class Ad
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
-
         return $this;
     }
 
-    public function getPrice(): ?float
+    public function getPrice(): ?string
     {
         return $this->price;
     }
 
-    public function setPrice(float $price): self
+    public function setPrice(string | float $price): self
     {
-        $this->price = $price;
-
+        $this->price = (string) $price;
         return $this;
     }
 
@@ -198,7 +244,6 @@ class Ad
     public function setIntroduction(string $introduction): self
     {
         $this->introduction = $introduction;
-
         return $this;
     }
 
@@ -210,7 +255,6 @@ class Ad
     public function setContent(string $content): self
     {
         $this->content = $content;
-
         return $this;
     }
 
@@ -222,7 +266,6 @@ class Ad
     public function setCoverImage(string $coverImage): self
     {
         $this->coverImage = $coverImage;
-
         return $this;
     }
 
@@ -234,39 +277,94 @@ class Ad
     public function setRooms(int $rooms): self
     {
         $this->rooms = $rooms;
-
         return $this;
     }
 
-    /**
-     * @return Collection|Image[]
-     */
-    public function getImages(): Collection
+    public function getMaxGuests(): int
     {
-        return $this->images;
+        return $this->maxGuests;
     }
 
-    public function addImage(Image $image): self
+    public function setMaxGuests(int $maxGuests): self
     {
-        if (!$this->images->contains($image)) {
-            $this->images[] = $image;
-            $image->setAd($this);
-        }
-
+        $this->maxGuests = $maxGuests;
         return $this;
     }
 
-    public function removeImage(Image $image): self
+    public function getAddress(): ?string
     {
-        if ($this->images->contains($image)) {
-            $this->images->removeElement($image);
-            // set the owning side to null (unless already changed)
-            if ($image->getAd() === $this) {
-                $image->setAd(null);
-            }
-        }
+        return $this->address;
+    }
 
+    public function setAddress(?string $address): self
+    {
+        $this->address = $address;
         return $this;
+    }
+
+    public function getCity(): ?string
+    {
+        return $this->city;
+    }
+
+    public function setCity(?string $city): self
+    {
+        $this->city = $city;
+        return $this;
+    }
+
+    public function getCountry(): ?string
+    {
+        return $this->country;
+    }
+
+    public function setCountry(?string $country): self
+    {
+        $this->country = $country;
+        return $this;
+    }
+
+    public function getLatitude(): ?float
+    {
+        return $this->latitude;
+    }
+
+    public function setLatitude(?float $latitude): self
+    {
+        $this->latitude = $latitude;
+        return $this;
+    }
+
+    public function getLongitude(): ?float
+    {
+        return $this->longitude;
+    }
+
+    public function setLongitude(?float $longitude): self
+    {
+        $this->longitude = $longitude;
+        return $this;
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->isPublished;
+    }
+
+    public function setIsPublished(bool $isPublished): self
+    {
+        $this->isPublished = $isPublished;
+        return $this;
+    }
+
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
     }
 
     public function getAuthor(): ?User
@@ -277,13 +375,61 @@ class Ad
     public function setAuthor(?User $author): self
     {
         $this->author = $author;
-
         return $this;
     }
 
-    /**
-     * @return Collection|Booking[]
-     */
+    public function getCategory(): ?Category
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?Category $category): self
+    {
+        $this->category = $category;
+        return $this;
+    }
+
+    public function getAmenities(): Collection
+    {
+        return $this->amenities;
+    }
+
+    public function addAmenity(Amenity $amenity): self
+    {
+        if (!$this->amenities->contains($amenity)) {
+            $this->amenities->add($amenity);
+        }
+        return $this;
+    }
+
+    public function removeAmenity(Amenity $amenity): self
+    {
+        $this->amenities->removeElement($amenity);
+        return $this;
+    }
+
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(Image $image): self
+    {
+        if (!$this->images->contains($image)) {
+            $this->images->add($image);
+            $image->setAd($this);
+        }
+        return $this;
+    }
+
+    public function removeImage(Image $image): self
+    {
+        if ($this->images->removeElement($image) && $image->getAd() === $this) {
+            $image->setAd(null);
+        }
+        return $this;
+    }
+
     public function getBookings(): Collection
     {
         return $this->bookings;
@@ -292,29 +438,20 @@ class Ad
     public function addBooking(Booking $booking): self
     {
         if (!$this->bookings->contains($booking)) {
-            $this->bookings[] = $booking;
+            $this->bookings->add($booking);
             $booking->setAd($this);
         }
-
         return $this;
     }
 
     public function removeBooking(Booking $booking): self
     {
-        if ($this->bookings->contains($booking)) {
-            $this->bookings->removeElement($booking);
-            // set the owning side to null (unless already changed)
-            if ($booking->getAd() === $this) {
-                $booking->setAd(null);
-            }
+        if ($this->bookings->removeElement($booking) && $booking->getAd() === $this) {
+            $booking->setAd(null);
         }
-
         return $this;
     }
 
-    /**
-     * @return Collection|Comment[]
-     */
     public function getComments(): Collection
     {
         return $this->comments;
@@ -323,23 +460,22 @@ class Ad
     public function addComment(Comment $comment): self
     {
         if (!$this->comments->contains($comment)) {
-            $this->comments[] = $comment;
+            $this->comments->add($comment);
             $comment->setAd($this);
         }
-
         return $this;
     }
 
     public function removeComment(Comment $comment): self
     {
-        if ($this->comments->contains($comment)) {
-            $this->comments->removeElement($comment);
-            // set the owning side to null (unless already changed)
-            if ($comment->getAd() === $this) {
-                $comment->setAd(null);
-            }
+        if ($this->comments->removeElement($comment) && $comment->getAd() === $this) {
+            $comment->setAd(null);
         }
-
         return $this;
+    }
+
+    public function getFavorites(): Collection
+    {
+        return $this->favorites;
     }
 }

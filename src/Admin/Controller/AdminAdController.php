@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace App\Admin\Controller;
 
-use App\Ad\Form\AdType;
 use App\Entity\Ad;
-use App\Repository\AdRepository;
-use App\Shared\Service\PaginationService;
+use App\Ad\Form\AdType;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Shared\Service\PaginationService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class AdminAdController extends AbstractController
 {
@@ -36,7 +35,7 @@ class AdminAdController extends AbstractController
             $manager->persist($ad);
             $manager->flush();
 
-            $this->addFlash('success', "L'annonce <strong>{$ad->getTitle()}</strong> a bien été enregistrée !");
+            $this->addFlash('success', "The listing <strong>{$ad->getTitle()}</strong> has been saved successfully!");
         }
 
         return $this->render('admin/ad/edit.html.twig', [
@@ -49,11 +48,11 @@ class AdminAdController extends AbstractController
     public function delete(Ad $ad, EntityManagerInterface $manager): Response
     {
         if (count($ad->getBookings()) > 0) {
-            $this->addFlash('warning', "Vous ne pouvez pas supprimer l'annonce <strong>{$ad->getTitle()}</strong> car elle possède déjà des réservations.");
+            $this->addFlash('warning', "You cannot delete the listing <strong>{$ad->getTitle()}</strong> because it already has bookings.");
         } else {
             $manager->remove($ad);
             $manager->flush();
-            $this->addFlash('success', "L'annonce <strong>{$ad->getTitle()}</strong> a bien été supprimée.");
+            $this->addFlash('success', "The listing <strong>{$ad->getTitle()}</strong> has been deleted successfully.");
         }
 
         return $this->redirectToRoute('admin_ads_index');

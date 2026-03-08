@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Admin\Controller;
 
-use App\Admin\Form\AdminBookingType;
 use App\Entity\Booking;
-use App\Shared\Service\PaginationService;
+use App\Admin\Form\AdminBookingType;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use App\Shared\Service\PaginationService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class AdminBookingController extends AbstractController
 {
@@ -37,7 +37,7 @@ class AdminBookingController extends AbstractController
             $manager->persist($booking);
             $manager->flush();
 
-            $this->addFlash('success', "La réservation n°{$booking->getId()} a bien été modifiée.");
+            $this->addFlash('success', "Booking #{$booking->getId()} has been updated successfully.");
 
             return $this->redirectToRoute('admin_booking_index');
         }
@@ -54,7 +54,7 @@ class AdminBookingController extends AbstractController
         $manager->remove($booking);
         $manager->flush();
 
-        $this->addFlash('success', 'La réservation a bien été supprimée.');
+        $this->addFlash('success', 'The booking has been deleted successfully.');
 
         return $this->redirectToRoute('admin_booking_index');
     }
