@@ -42,6 +42,9 @@ cache-clear: ## Clear the cache
 test: ## Run tests
 	$(PHP) bin/phpunit
 
+fixtures: ## Load fixtures
+	$(PHP) bin/console doctrine:fixtures:load --no-interaction
+
 db-shell: ## Open a database shell
 	$(DOCKER) exec database psql -U app -d app
 

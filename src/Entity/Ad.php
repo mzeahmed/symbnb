@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use Cocur\Slugify\Slugify;
-use App\Repository\AdRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\AdRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -75,7 +75,7 @@ class Ad
      */
     #[ORM\PrePersist]
     #[ORM\PreUpdate]
-    public function initilizeSlug()
+    public function initilizeSlug(): void
     {
         if (empty($this->slug)) {
             $slugify = new Slugify();
@@ -106,7 +106,7 @@ class Ad
      *
      * @return float|int
      */
-    public function getAvgRatings()
+    public function getAvgRatings(): float|int
     {
         // Calculate the sum of ratings
         $sum = array_reduce($this->comments->toArray(), function ($total, $comment) {

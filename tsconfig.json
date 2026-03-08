@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "outDir": "./public/build",
+    "noImplicitAny": true,
+    "module": "es6",
+    "jsx": "react",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "target": "es2021",
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "allowSyntheticDefaultImports": true,
+    "composite": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "./assets/**/*.ts"
+  ],
+  "exclude": [
+    "./node_modules"
+  ],
+}

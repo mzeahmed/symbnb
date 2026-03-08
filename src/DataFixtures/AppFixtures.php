@@ -17,7 +17,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
-    private $encoder;
+    private UserPasswordHasherInterface $encoder;
 
     public function __construct(UserPasswordHasherInterface $encoder)
     {
@@ -58,7 +58,7 @@ class AppFixtures extends Fixture
 
             $picture .= ($genre == 'male' ? 'men/' : 'women/') . $pictureId;
 
-            $hash = $this->encoder->encodePassword($user, 'password');
+            $hash = $this->encoder->hashPassword($user, 'password');
 
             $user->setFirstName($faker->firstName($genre))
                  ->setLastName($faker->lastName)

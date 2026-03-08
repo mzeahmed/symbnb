@@ -1,3 +1,8 @@
 controllers:
-  resource: ../src/Controller/
+  resource: ../src/
   type: attribute
+  exclude:
+    - ../src/Entity/
+    - ../src/Repository/
+    - ../src/DataFixtures/
+    - ../src/Kernel.php
