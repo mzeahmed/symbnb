@@ -30,7 +30,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var list<string>
      */
-    #[ORM\Column]
+    #[ORM\Column(type: 'jsonb')]
     private array $roles = [];
 
     /**
