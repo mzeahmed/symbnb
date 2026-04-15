@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Booking\Enum\BookingStatus;
 use App\Repository\BookingRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BookingRepository::class)]
-#[ORM\HasLifecycleCallbacks]
 class Booking
 {
     #[ORM\Id]
@@ -42,7 +44,7 @@ class Booking
     private \DateTimeImmutable $createdAt;
 
     /**
-     * Total price stored as NUMERIC(10,2) for monetary precision.
+     * Total price — set by PricingService before persist, never by the entity itself.
      */
     #[ORM\Column(type: 'decimal', precision: 10, scale: 2)]
     private ?string $amount = null;
@@ -70,67 +72,20 @@ class Booking
     #[ORM\OneToOne(targetEntity: Comment::class, mappedBy: 'booking', cascade: ['persist', 'remove'])]
     private ?Comment $review = null;
 
+    /**
+     * Payment attempts for this booking — OneToMany because a booking
+     * can have multiple attempts (failed + retry) before a successful payment.
+     */
+    #[ORM\OneToMany(targetEntity: Payment::class, mappedBy: 'booking', cascade: ['persist'])]
+    private Collection $payments;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->payments = new ArrayCollection();
     }
 
-    #[ORM\PrePersist]
-    #[ORM\PreUpdate]
-    public function prePersist(): void
-    {
-        if ($this->amount === null || (float) $this->amount === 0.0) {
-            $this->amount = (string) ($this->ad->getPriceAsFloat() * $this->getDuration());
-        }
-    }
-
-    // ── Domain helpers ────────────────────────────────────────────────────────
-
-    /**
-     * Returns false if any chosen day overlaps an existing confirmed/pending booking.
-     */
-    public function isBookableDates(): bool
-    {
-        $unavailable = array_map(
-            fn (\DateTimeInterface $d) => $d->format('Y-m-d'),
-            $this->ad->getNotAvailableDays()
-        );
-
-        foreach ($this->getDays() as $day) {
-            if (in_array($day->format('Y-m-d'), $unavailable, true)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /** @return \DateTime[] */
-    public function getDays(): array
-    {
-        $timestamps = range(
-            $this->startDate->getTimestamp(),
-            $this->endDate->getTimestamp(),
-            86400
-        );
-
-        return array_map(
-            fn (int $ts) => new \DateTime(date('Y-m-d', $ts)),
-            $timestamps
-        );
-    }
-
-    public function getDuration(): int
-    {
-        return (int) $this->endDate->diff($this->startDate)->days;
-    }
-
-    public function cancel(string $reason = ''): void
-    {
-        $this->status = BookingStatus::Cancelled;
-        $this->cancelledAt = new \DateTimeImmutable();
-        $this->cancellationReason = $reason ?: null;
-    }
+    // ── State machine ─────────────────────────────────────────────────────────
 
     public function confirm(): void
     {
@@ -142,6 +97,26 @@ class Booking
         $this->status = BookingStatus::Completed;
     }
 
+    public function cancel(string $reason = ''): void
+    {
+        $this->status = BookingStatus::Cancelled;
+        $this->cancelledAt = new \DateTimeImmutable();
+        $this->cancellationReason = $reason ?: null;
+    }
+
+    // ── Pure helpers (no dependencies) ────────────────────────────────────────
+
+    public function getDuration(): int
+    {
+        if ($this->startDate === null || $this->endDate === null) {
+            return 0;
+        }
+
+        return (int) $this->endDate->diff($this->startDate)->days;
+    }
+
+    // ── Getters / Setters ─────────────────────────────────────────────────────
+
     public function getId(): ?int
     {
         return $this->id;
@@ -152,7 +127,7 @@ class Booking
         return $this->booker;
     }
 
-    public function setBooker(?User $booker): self
+    public function setBooker(?User $booker): static
     {
         $this->booker = $booker;
 
@@ -164,7 +139,7 @@ class Booking
         return $this->ad;
     }
 
-    public function setAd(?Ad $ad): self
+    public function setAd(?Ad $ad): static
     {
         $this->ad = $ad;
 
@@ -176,7 +151,7 @@ class Booking
         return $this->startDate;
     }
 
-    public function setStartDate(\DateTimeInterface $startDate): self
+    public function setStartDate(\DateTimeInterface $startDate): static
     {
         $this->startDate = $startDate;
 
@@ -188,7 +163,7 @@ class Booking
         return $this->endDate;
     }
 
-    public function setEndDate(\DateTimeInterface $endDate): self
+    public function setEndDate(\DateTimeInterface $endDate): static
     {
         $this->endDate = $endDate;
 
@@ -205,7 +180,7 @@ class Booking
         return $this->amount;
     }
 
-    public function setAmount(string | float $amount): self
+    public function setAmount(string|float $amount): static
     {
         $this->amount = (string) $amount;
 
@@ -217,7 +192,7 @@ class Booking
         return $this->comment;
     }
 
-    public function setComment(?string $comment): self
+    public function setComment(?string $comment): static
     {
         $this->comment = $comment;
 
@@ -229,7 +204,7 @@ class Booking
         return $this->status;
     }
 
-    public function setStatus(BookingStatus $status): self
+    public function setStatus(BookingStatus $status): static
     {
         $this->status = $status;
 
@@ -241,7 +216,7 @@ class Booking
         return $this->guestsCount;
     }
 
-    public function setGuestsCount(int $guestsCount): self
+    public function setGuestsCount(int $guestsCount): static
     {
         $this->guestsCount = $guestsCount;
 
@@ -263,7 +238,7 @@ class Booking
         return $this->review;
     }
 
-    public function setReview(?Comment $review): self
+    public function setReview(?Comment $review): static
     {
         if ($review !== null && $review->getBooking() !== $this) {
             $review->setBooking($this);
@@ -271,5 +246,10 @@ class Booking
         $this->review = $review;
 
         return $this;
+    }
+
+    public function getPayments(): Collection
+    {
+        return $this->payments;
     }
 }

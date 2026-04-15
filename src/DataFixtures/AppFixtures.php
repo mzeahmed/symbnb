@@ -14,7 +14,7 @@ use App\Entity\Booking;
 use App\Entity\Comment;
 use App\Entity\Category;
 use App\Entity\Favorite;
-use App\Entity\BookingStatus;
+use App\Booking\Enum\BookingStatus;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;

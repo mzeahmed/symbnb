@@ -61,3 +61,6 @@ pint: ## Run Pint
 pintf: ## Run Pint and fix
 	@echo "$(GREEN)Running Pint and fixing$(NO_COLOR)"
 	$(COMPOSER) run lint:fix
+
+entity: ## Generate an entity
+	$(PHP) bin/console make:entity

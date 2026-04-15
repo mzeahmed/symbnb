@@ -59,8 +59,6 @@ class Comment
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    // ── Getters / Setters ─────────────────────────────────────────────────────
-
     public function getId(): ?int
     {
         return $this->id;
@@ -84,6 +82,7 @@ class Comment
     public function setRating(int $rating): self
     {
         $this->rating = $rating;
+
         return $this;
     }
 
@@ -95,6 +94,7 @@ class Comment
     public function setContent(string $content): self
     {
         $this->content = $content;
+
         return $this;
     }
 
@@ -106,6 +106,7 @@ class Comment
     public function setAd(?Ad $ad): self
     {
         $this->ad = $ad;
+
         return $this;
     }
 
@@ -117,6 +118,7 @@ class Comment
     public function setAuthor(?User $author): self
     {
         $this->author = $author;
+
         return $this;
     }
 
@@ -128,6 +130,7 @@ class Comment
     public function setBooking(?Booking $booking): self
     {
         $this->booking = $booking;
+
         return $this;
     }
 }

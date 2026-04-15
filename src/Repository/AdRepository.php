@@ -22,49 +22,53 @@ class AdRepository extends ServiceEntityRepository
     }
 
     /**
-     * Recuperation des meilleurs annonces
+     * Retourne les meilleures annonces publiées, triées par note moyenne descendante.
+     * Utilise HIDDEN pour éviter d'exposer la colonne calculée dans le résultat Doctrine.
      *
-     * @param $limit
-     * @return mixed
+     * @return Ad[]
      */
-    public function findBestAds($limit)
+    public function findBestAds(int $limit): array
     {
         return $this->createQueryBuilder('a')
-            ->select('a as annonce, AVG(c.rating) as avgRatings')
+            ->select('a, AVG(c.rating) as HIDDEN avgRating')
             ->join('a.comments', 'c')
-            ->groupBy('a')
-            ->orderBy('avgRatings', 'DESC')
+            ->where('a.isPublished = true')
+            ->groupBy('a.id')
+            ->orderBy('avgRating', 'DESC')
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
     }
 
-    //    /**
-    //     * @return Ad[] Returns an array of Ad objects
-    //     */
-    /*
-    public function findByExampleField($value)
+    /**
+     * Retourne les annonces publiées avec leur auteur et catégorie en JOIN FETCH
+     * pour éviter les requêtes N+1 lors de l'affichage des listings.
+     *
+     * @return Ad[]
+     */
+    public function findPublishedWithAuthor(int $page = 1, int $limit = 12): array
     {
         return $this->createQueryBuilder('a')
-            ->andWhere('a.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('a.id', 'ASC')
-            ->setMaxResults(10)
+            ->addSelect('u', 'c')
+            ->join('a.author', 'u')
+            ->leftJoin('a.category', 'c')
+            ->where('a.isPublished = true')
+            ->orderBy('a.createdAt', 'DESC')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?Ad
+    /**
+     * Compte les annonces publiées — utilisé pour la pagination.
+     */
+    public function countPublished(): int
     {
-        return $this->createQueryBuilder('a')
-            ->andWhere('a.exampleField = :val')
-            ->setParameter('val', $value)
+        return (int) $this->createQueryBuilder('a')
+            ->select('COUNT(a.id)')
+            ->where('a.isPublished = true')
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getSingleScalarResult();
     }
-    */
 }

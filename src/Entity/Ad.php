@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use Cocur\Slugify\Slugify;
-use App\Repository\AdRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\AdRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -88,8 +88,6 @@ class Ad
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    // ── Relations ─────────────────────────────────────────────────────────────
-
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'ads')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $author = null;
@@ -102,7 +100,7 @@ class Ad
     #[ORM\JoinTable(name: 'ad_amenity')]
     private Collection $amenities;
 
-    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'ad', orphanRemoval: true, cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'ad', cascade: ['persist'], orphanRemoval: true)]
     #[Assert\Valid]
     private Collection $images;
 
@@ -135,8 +133,6 @@ class Ad
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    // ── Domain helpers ────────────────────────────────────────────────────────
-
     public function getCommentFromAuthor(User $author): ?Comment
     {
         foreach ($this->comments as $comment) {
@@ -144,59 +140,14 @@ class Ad
                 return $comment;
             }
         }
+
         return null;
-    }
-
-    public function getAvgRatings(): float
-    {
-        $count = count($this->comments);
-        if ($count === 0) {
-            return 0.0;
-        }
-
-        $sum = array_reduce(
-            $this->comments->toArray(),
-            fn (int $carry, Comment $c) => $carry + $c->getRating(),
-            0
-        );
-
-        return round($sum / $count, 1);
-    }
-
-    /**
-     * Returns all days blocked by confirmed or pending bookings.
-     *
-     * @return \DateTimeInterface[]
-     */
-    public function getNotAvailableDays(): array
-    {
-        $blocked = [];
-
-        foreach ($this->bookings as $booking) {
-            if ($booking->getStatus() === BookingStatus::Cancelled) {
-                continue;
-            }
-
-            $days = range(
-                $booking->getStartDate()->getTimestamp(),
-                $booking->getEndDate()->getTimestamp(),
-                86400
-            );
-
-            foreach ($days as $ts) {
-                $blocked[] = new \DateTime(date('Y-m-d', $ts));
-            }
-        }
-
-        return $blocked;
     }
 
     public function getPriceAsFloat(): float
     {
         return (float) $this->price;
     }
-
-    // ── Getters / Setters ─────────────────────────────────────────────────────
 
     public function getId(): ?int
     {
@@ -211,6 +162,7 @@ class Ad
     public function setTitle(string $title): self
     {
         $this->title = $title;
+
         return $this;
     }
 
@@ -222,6 +174,7 @@ class Ad
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
+
         return $this;
     }
 
@@ -230,9 +183,10 @@ class Ad
         return $this->price;
     }
 
-    public function setPrice(string | float $price): self
+    public function setPrice(string|float $price): self
     {
         $this->price = (string) $price;
+
         return $this;
     }
 
@@ -244,6 +198,7 @@ class Ad
     public function setIntroduction(string $introduction): self
     {
         $this->introduction = $introduction;
+
         return $this;
     }
 
@@ -255,6 +210,7 @@ class Ad
     public function setContent(string $content): self
     {
         $this->content = $content;
+
         return $this;
     }
 
@@ -266,6 +222,7 @@ class Ad
     public function setCoverImage(string $coverImage): self
     {
         $this->coverImage = $coverImage;
+
         return $this;
     }
 
@@ -277,6 +234,7 @@ class Ad
     public function setRooms(int $rooms): self
     {
         $this->rooms = $rooms;
+
         return $this;
     }
 
@@ -288,6 +246,7 @@ class Ad
     public function setMaxGuests(int $maxGuests): self
     {
         $this->maxGuests = $maxGuests;
+
         return $this;
     }
 
@@ -299,6 +258,7 @@ class Ad
     public function setAddress(?string $address): self
     {
         $this->address = $address;
+
         return $this;
     }
 
@@ -310,6 +270,7 @@ class Ad
     public function setCity(?string $city): self
     {
         $this->city = $city;
+
         return $this;
     }
 
@@ -321,6 +282,7 @@ class Ad
     public function setCountry(?string $country): self
     {
         $this->country = $country;
+
         return $this;
     }
 
@@ -332,6 +294,7 @@ class Ad
     public function setLatitude(?float $latitude): self
     {
         $this->latitude = $latitude;
+
         return $this;
     }
 
@@ -343,6 +306,7 @@ class Ad
     public function setLongitude(?float $longitude): self
     {
         $this->longitude = $longitude;
+
         return $this;
     }
 
@@ -354,6 +318,7 @@ class Ad
     public function setIsPublished(bool $isPublished): self
     {
         $this->isPublished = $isPublished;
+
         return $this;
     }
 
@@ -375,6 +340,7 @@ class Ad
     public function setAuthor(?User $author): self
     {
         $this->author = $author;
+
         return $this;
     }
 
@@ -386,6 +352,7 @@ class Ad
     public function setCategory(?Category $category): self
     {
         $this->category = $category;
+
         return $this;
     }
 
@@ -399,12 +366,14 @@ class Ad
         if (!$this->amenities->contains($amenity)) {
             $this->amenities->add($amenity);
         }
+
         return $this;
     }
 
     public function removeAmenity(Amenity $amenity): self
     {
         $this->amenities->removeElement($amenity);
+
         return $this;
     }
 
@@ -419,6 +388,7 @@ class Ad
             $this->images->add($image);
             $image->setAd($this);
         }
+
         return $this;
     }
 
@@ -427,6 +397,7 @@ class Ad
         if ($this->images->removeElement($image) && $image->getAd() === $this) {
             $image->setAd(null);
         }
+
         return $this;
     }
 
@@ -441,6 +412,7 @@ class Ad
             $this->bookings->add($booking);
             $booking->setAd($this);
         }
+
         return $this;
     }
 
@@ -449,6 +421,7 @@ class Ad
         if ($this->bookings->removeElement($booking) && $booking->getAd() === $this) {
             $booking->setAd(null);
         }
+
         return $this;
     }
 
@@ -463,6 +436,7 @@ class Ad
             $this->comments->add($comment);
             $comment->setAd($this);
         }
+
         return $this;
     }
 
@@ -471,6 +445,7 @@ class Ad
         if ($this->comments->removeElement($comment) && $comment->getAd() === $this) {
             $comment->setAd(null);
         }
+
         return $this;
     }
 

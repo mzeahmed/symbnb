@@ -21,32 +21,36 @@ class CommentRepository extends ServiceEntityRepository
         parent::__construct($registry, Comment::class);
     }
 
-    //    /**
-    //     * @return Comment[] Returns an array of Comment objects
-    //     */
-    /*
-    public function findByExampleField($value)
+    /**
+     * Calcule la note moyenne d'une annonce via une requête SQL agrégée.
+     * Remplace Ad::getAvgRatings() qui chargeait tous les comments en mémoire.
+     */
+    public function getAverageRatingForAd(int $adId): float
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
+        $result = $this->createQueryBuilder('c')
+            ->select('AVG(c.rating) as avg')
+            ->where('c.ad = :adId')
+            ->setParameter('adId', $adId)
             ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+            ->getSingleScalarResult();
 
-    /*
-    public function findOneBySomeField($value): ?Comment
+        return round((float) $result, 1);
+    }
+
+    /**
+     * Retourne les avis d'une annonce avec l'auteur en JOIN FETCH.
+     *
+     * @return Comment[]
+     */
+    public function findByAdWithAuthor(int $adId): array
     {
         return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
+            ->addSelect('u')
+            ->join('c.author', 'u')
+            ->where('c.ad = :adId')
+            ->setParameter('adId', $adId)
+            ->orderBy('c.createdAt', 'DESC')
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getResult();
     }
-    */
 }
