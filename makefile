@@ -22,7 +22,7 @@ up: ## Start the containers
 	@echo ""
 
 down: ## Stop the containers
-	$(DOCKER) down -v
+	$(DOCKER) down
 
 logs: ## Show the logs
 	$(DOCKER) logs -f
