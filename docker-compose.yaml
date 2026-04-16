@@ -30,22 +30,23 @@ services:
 
   ###> doctrine/doctrine-bundle ###
   database:
-    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    image: mysql:${MYSQL_VERSION:-8.0}
     container_name: symbnb_database
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-app}
       # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-      POSTGRES_USER: ${POSTGRES_USER:-app}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password}
+      MYSQL_USER: ${MYSQL_USER:-app}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
     healthcheck:
-      test: [ "CMD", "pg_isready", "-d", "${POSTGRES_DB:-app}", "-U", "${POSTGRES_USER:-app}" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER:-app}", "-p${MYSQL_PASSWORD:-password}" ]
       timeout: 5s
       retries: 5
       start_period: 60s
     volumes:
-      - database_data:/var/lib/postgresql/data:rw
+      - database_data:/var/lib/mysql:rw
       # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
+      # - ./docker/db/data:/var/lib/mysql:rw
     networks:
       - symbnb
   ###< doctrine/doctrine-bundle ###
@@ -58,11 +59,14 @@ services:
     networks:
       - symbnb
 
-  adminer:
-    image: adminer
-    container_name: symbnb_adminer
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: symbnb_phpmyadmin
     ports:
-      - "8081:8080"
+      - "8081:80"
+    environment:
+      PMA_HOST: database
+      PMA_PORT: 3306
     depends_on:
       - database
     networks:

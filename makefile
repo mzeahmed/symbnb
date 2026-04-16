@@ -18,11 +18,11 @@ up: ## Start the containers
 	@echo "$(GREEN)✔ Containers started successfully$(NO_COLOR)"
 	@echo ""
 	@echo "$(BLUE)Application URL :$(NO_COLOR) $(YELLOW)http://localhost:8080$(NO_COLOR)"
-	@echo "$(BLUE)Adminer URL :$(NO_COLOR) $(YELLOW)http://localhost:8081$(NO_COLOR)"
+	@echo "$(BLUE)PhpMyAdmin URL :$(NO_COLOR) $(YELLOW)http://localhost:8081$(NO_COLOR)"
 	@echo ""
 
 down: ## Stop the containers
-	$(DOCKER) down
+	$(DOCKER) down -v
 
 logs: ## Show the logs
 	$(DOCKER) logs -f
