@@ -8,10 +8,10 @@ use App\Entity\User;
 use App\Security\RegisterUser;
 use App\Repository\UserRepository;
 use App\User\Form\RegistrationType;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Shared\Http\Response\ApiResponseInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
@@ -38,9 +38,13 @@ class SecurityController extends AbstractController
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 
-    #[Route(path: "/register", name: "app_register")]
-    public function register(Request $request, RegisterUser $register, UserRepository $userRepository): Response
-    {
+    #[Route(path: '/register', name: 'app_register')]
+    public function register(
+        Request $request,
+        RegisterUser $register,
+        UserRepository $userRepository,
+        ApiResponseInterface $apiResponse
+    ): Response {
         $user = new User();
 
         $form = $this->createForm(RegistrationType::class, $user);
@@ -48,27 +52,28 @@ class SecurityController extends AbstractController
 
         $bestUsers = $userRepository->findBestUsers(5);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted()) {
+            if (!$form->isValid()) {
+                $errors = [];
+                foreach ($form->getErrors(true) as $error) {
+                    $errors[] = $error->getMessage();
+                }
+
+                return $apiResponse->error('Validation failed', $errors, 422);
+            }
+
             /** @var string $plainPassword */
             $plainPassword = $form->get('password')->getData();
 
             $passwordConfirmation = (string) $form->get('passwordConfirm')->getData();
 
             if ($plainPassword !== $passwordConfirmation) {
-                $form->get('passwordConfirm')
-                     ->addError(new FormError('Passwords do not match!'));
-
-                return $this->render('security/register.html.twig', [
-                    'form' => $form,
-                    'bestUsers' => $bestUsers,
-                ]);
+                return $apiResponse->error('Passwords do not match!', ['passwordConfirm' => 'Passwords do not match!'], 422);
             }
 
             $register($user, $plainPassword);
 
-            $this->addFlash('success', 'Your account has been created! You can now log in!');
-
-            return $this->redirectToRoute('app_login');
+            return $apiResponse->success([], 'Your account has been created! You can now log in!');
         }
 
         return $this->render('security/register.html.twig', [

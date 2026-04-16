@@ -17,10 +17,15 @@
     "composite": true,
     "skipLibCheck": true
   },
+  "paths": {
+    "@/*": [
+      "assets/scripts/*"
+    ]
+  },
   "include": [
     "./assets/**/*.ts"
   ],
   "exclude": [
     "./node_modules"
-  ],
+  ]
 }

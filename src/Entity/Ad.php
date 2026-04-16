@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use Cocur\Slugify\Slugify;
-use Doctrine\ORM\Mapping as ORM;
 use App\Repository\AdRepository;
+use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -183,7 +183,7 @@ class Ad
         return $this->price;
     }
 
-    public function setPrice(string|float $price): self
+    public function setPrice(string | float $price): self
     {
         $this->price = (string) $price;
 

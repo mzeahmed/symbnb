@@ -1,4 +1,5 @@
 const Encore = require('@symfony/webpack-encore');
+const path = require('path');
 
 Encore
   // directory where compiled assets will be stored
@@ -31,7 +32,7 @@ Encore
    * and one CSS file (e.g. app.css) if you JavaScript imports CSS.
    */
   .addEntry('app', './assets/app.ts')
-  // .addEntry('ad', './assets/js/ad.js')
+  .addEntry('security', './assets/scripts/features/security/security.ts')
 
   // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
   .splitEntryChunks()
@@ -71,16 +72,20 @@ Encore
   // uncomment if you use TypeScript
   .enableTypeScriptLoader()
 
-// uncomment to get integrity="..." attributes on your script & link tags
-// requires WebpackEncoreBundle 1.4 or higher
-//.enableIntegrityHashes()
+  // uncomment to get integrity="..." attributes on your script & link tags
+  // requires WebpackEncoreBundle 1.4 or higher
+  //.enableIntegrityHashes()
 
-// uncomment if you're having problems with a jQuery plugin
-// .autoProvidejQuery()
+  // uncomment if you're having problems with a jQuery plugin
+  // .autoProvidejQuery()
 
-// uncomment if you use API Platform Admin (composer req api-admin)
-//.enableReactPreset()
-//.addEntry('admin', './assets/js/admin.js')
+  // uncomment if you use API Platform Admin (composer req api-admin)
+  //.enableReactPreset()
+  //.addEntry('admin', './assets/js/admin.js')
+
+  .addAliases({
+    '@': path.resolve(__dirname, 'assets/scripts/'),
+  })
 ;
 
 module.exports = Encore.getWebpackConfig();

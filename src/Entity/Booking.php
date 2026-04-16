@@ -180,7 +180,7 @@ class Booking
         return $this->amount;
     }
 
-    public function setAmount(string|float $amount): static
+    public function setAmount(string | float $amount): static
     {
         $this->amount = (string) $amount;
 
