@@ -143,7 +143,7 @@ class AppFixtures extends Fixture
             'Strasbourg',
             'New York',
             'Moroni',
-            'Rio'
+            'Rio',
         ];
 
         $ads = [];

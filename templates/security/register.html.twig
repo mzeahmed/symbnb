@@ -2,6 +2,11 @@
 
 {% block title %}SymBnb - Create your account{% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('security') }}
+{% endblock %}
+
 {% block body %}
     <div class="bg-gray-50 min-h-screen flex flex-col m-0 p-0">
         <main class="flex-grow flex flex-col md:flex-row min-h-screen">
@@ -98,7 +103,11 @@
                         {{ form_errors(form.passwordConfirm) }}
                     </div>
 
-                    <button type="submit" class="w-full bg-coral hover:bg-coral-dark text-white font-semibold py-3.5 px-4 rounded-xl transition-colors duration-200 shadow mt-6 cursor-pointer">
+                    <button
+                            type="submit"
+                            class="w-full bg-coral hover:bg-coral-dark text-white font-semibold py-3.5 px-4 rounded-xl transition-colors duration-200 shadow mt-6 cursor-pointer"
+                            id="register-button"
+                    >
                         Create Account
                     </button>
 

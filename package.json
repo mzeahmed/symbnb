@@ -14,6 +14,7 @@
     "@tailwindplus/elements": "^1.0.2",
     "autoprefixer": "^10.4.21",
     "core-js": "^3.38.0",
+    "notyf": "^3.10.0",
     "file-loader": "^6.2.0",
     "postcss": "^8.5.10",
     "postcss-loader": "^8.2.1",

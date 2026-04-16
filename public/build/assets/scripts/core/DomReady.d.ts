@@ -9,7 +9,16 @@
  */
 export declare class DomReady {
     /**
-     * Executes the callback when the DOM is ready.
+     * Executes the callback when the entire page (including images and subframes) is loaded.
+     * @param {() => void} callback
+     * @returns {DomReady}
      */
-    static run(callback: () => void): void;
+    onLoad(callback: () => void): DomReady;
+    /**
+     * Executes the callback when the DOM is ready (but before images and subframes are loaded).
+     * @param {() => void} callback
+     * @returns {DomReady}
+     */
+    ready(callback: () => void): DomReady;
 }
+export declare const domReady: DomReady;

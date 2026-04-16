@@ -6,11 +6,17 @@
  */
 
 import {Autogrow} from './scripts/shared/UI/Autogrow';
-import {DomReady} from './scripts/core/DomReady';
+import {domReady} from './scripts/core/DomReady';
 
 import './styles/app.scss';
 import '@tailwindplus/elements';
+import 'notyf/notyf.min.css';
+import {loader} from './scripts/shared/UI/loader';
 
-DomReady.run(() => {
-  Autogrow.init();
-});
+domReady
+  .ready(() => {
+    Autogrow.init();
+  })
+  .onLoad(() => {
+    loader.hide();
+  });

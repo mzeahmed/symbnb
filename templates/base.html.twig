@@ -43,6 +43,10 @@
             {% endfor %}
         </div>
 
+        <div id="page_loader" class="page-loader">
+            <div class="loader"></div>
+        </div>
+
         {% if not isLoginPage and not isRegisterPage %}
             {% include 'partials/_header.html.twig' %}
         {% endif %}
