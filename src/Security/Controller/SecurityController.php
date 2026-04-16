@@ -5,17 +5,15 @@ declare(strict_types=1);
 namespace App\Security\Controller;
 
 use App\Entity\User;
-use App\Security\UserRegistrar;
+use App\Security\RegisterUser;
 use App\Repository\UserRepository;
 use App\User\Form\RegistrationType;
 use Symfony\Component\Form\FormError;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class SecurityController extends AbstractController
 {
@@ -40,14 +38,9 @@ class SecurityController extends AbstractController
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 
-    #[Route("/register", name: "app_register")]
-    public function register(
-        Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager,
-        UserRegistrar $userRegistrar,
-        UserRepository $userRepository
-    ): Response {
+    #[Route(path: "/register", name: "app_register")]
+    public function register(Request $request, RegisterUser $register, UserRepository $userRepository): Response
+    {
         $user = new User();
 
         $form = $this->createForm(RegistrationType::class, $user);
@@ -58,7 +51,8 @@ class SecurityController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var string $plainPassword */
             $plainPassword = $form->get('password')->getData();
-            $passwordConfirmation = $form->get('passwordConfirm')->getData();
+
+            $passwordConfirmation = (string) $form->get('passwordConfirm')->getData();
 
             if ($plainPassword !== $passwordConfirmation) {
                 $form->get('passwordConfirm')
@@ -66,16 +60,11 @@ class SecurityController extends AbstractController
 
                 return $this->render('security/register.html.twig', [
                     'form' => $form,
+                    'bestUsers' => $bestUsers,
                 ]);
             }
 
-            $userRegistrar->register(
-                user: $user,
-                form: $form,
-                userPasswordHasher: $userPasswordHasher,
-                passwordConfirmation: $passwordConfirmation,
-                entityManager: $entityManager
-            );
+            $register($user, $plainPassword);
 
             $this->addFlash('success', 'Your account has been created! You can now log in!');
 
