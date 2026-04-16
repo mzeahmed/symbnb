@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class HomeController extends AbstractController
 {
-    #[Route('/', name: 'homepage')]
+    #[Route('/', name: 'app_home')]
     public function home(AdRepository $adRepo, UserRepository $userRepo): Response
     {
         return $this->render('home.html.twig', [

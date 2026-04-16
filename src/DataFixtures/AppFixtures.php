@@ -6,14 +6,15 @@ namespace App\DataFixtures;
 
 use App\Entity\Ad;
 use Faker\Factory;
-use App\Entity\Role;
 use App\Entity\User;
+use Faker\Generator;
 use App\Entity\Image;
 use App\Entity\Amenity;
 use App\Entity\Booking;
 use App\Entity\Comment;
 use App\Entity\Category;
 use App\Entity\Favorite;
+use Cocur\Slugify\Slugify;
 use App\Booking\Enum\BookingStatus;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -21,18 +22,15 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
-    public function __construct(private readonly UserPasswordHasherInterface $hasher)
-    {
+    public function __construct(
+        private readonly UserPasswordHasherInterface $hasher
+    ) {
     }
 
     public function load(ObjectManager $manager): void
     {
-        $faker = Factory::create('en_US');
-
-        // ── Roles ─────────────────────────────────────────────────────────────
-        $adminRole = new Role();
-        $adminRole->setTitle('ROLE_ADMIN');
-        $manager->persist($adminRole);
+        $faker = Factory::create('FR');
+        $slugify = new Slugify();
 
         // ── Admin user ────────────────────────────────────────────────────────
         $adminUser = new User();
@@ -40,13 +38,14 @@ class AppFixtures extends Fixture
             ->setFirstName('Admin')
             ->setLastName('User')
             ->setEmail('adminuser@symbnb.net')
-            ->setHash($this->hasher->hashPassword($adminUser, 'password'))
-            ->setPicture($this->getGravatar('adminuser@symbnb.net'))
-            ->setIntroduction($faker->sentence())
-            ->setDescription('<p>' . implode('</p><p>', $faker->paragraphs(3)) . '</p>')
+            ->setSlug('admin-user')
+            ->setPassword($this->hasher->hashPassword($adminUser, 'password'))
+            ->setAvatar($this->getGravatar('adminuser@symbnb.net'))
+            ->setBio(implode("\n\n", $faker->paragraphs(3)))
+            ->setRoles(['ROLE_ADMIN'])
             ->setIsHost(true)
             ->setIsVerified(true)
-            ->addUserRole($adminRole);
+            ->setPhone('+33 6 00 00 00 00');
         $manager->persist($adminUser);
 
         // ── Categories ────────────────────────────────────────────────────────
@@ -90,7 +89,9 @@ class AppFixtures extends Fixture
         $amenities = [];
         foreach ($amenityData as [$name, $icon, $group]) {
             $amenity = new Amenity();
-            $amenity->setName($name)->setIcon($icon)->setGroupName($group);
+            $amenity->setName($name)
+                    ->setIcon($icon)
+                    ->setGroupName($group);
             $manager->persist($amenity);
             $amenities[] = $amenity;
         }
@@ -103,6 +104,9 @@ class AppFixtures extends Fixture
             $user = new User();
             $gender = $faker->randomElement($genders);
             $num = $faker->numberBetween(1, 99);
+            $firstName = $faker->firstName($gender);
+            $lastName = $faker->lastName();
+            $email = $faker->unique()->safeEmail();
             $picture = sprintf(
                 'https://randomuser.me/api/portraits/%s/%d.jpg',
                 $gender === 'male' ? 'men' : 'women',
@@ -110,14 +114,14 @@ class AppFixtures extends Fixture
             );
 
             $user
-                ->setFirstName($faker->firstName($gender))
-                ->setLastName($faker->lastName())
-                ->setEmail($faker->unique()->safeEmail())
-                ->setHash($this->hasher->hashPassword($user, 'password'))
-                ->setPicture($picture)
-                ->setIntroduction($faker->sentence())
-                ->setDescription('<p>' . implode('</p><p>', $faker->paragraphs(3)) . '</p>')
-                ->setPhone($faker->optional(0.6)->phoneNumber())
+                ->setFirstName($firstName)
+                ->setLastName($lastName)
+                ->setEmail($email)
+                ->setSlug($slugify->slugify(sprintf('%s %s %d', $firstName, $lastName, $i + 1)))
+                ->setPassword($this->hasher->hashPassword($user, 'password'))
+                ->setAvatar($picture)
+                ->setBio(implode("\n\n", $faker->paragraphs(3)))
+                ->setPhone($faker->optional(0.6)->passthrough($this->generatePhoneNumber($faker)))
                 ->setIsHost($faker->boolean(40))
                 ->setIsVerified($faker->boolean(80));
 
@@ -128,7 +132,19 @@ class AppFixtures extends Fixture
         $allUsers = array_merge([$adminUser], $users);
 
         // ── Listings (Ads) ────────────────────────────────────────────────────
-        $cities = ['Paris', 'Lyon', 'Marseille', 'Nice', 'Bordeaux', 'Toulouse', 'Nantes', 'Strasbourg'];
+        $cities = [
+            'Paris',
+            'Lyon',
+            'Marseille',
+            'Nice',
+            'Bordeaux',
+            'Toulouse',
+            'Nantes',
+            'Strasbourg',
+            'New York',
+            'Moroni',
+            'Rio'
+        ];
 
         $ads = [];
         for ($i = 0; $i < 30; $i++) {
@@ -138,7 +154,7 @@ class AppFixtures extends Fixture
 
             $ad
                 ->setTitle($faker->unique()->sentence(4))
-                ->setCoverImage($faker->imageUrl(1000, 350, 'nature'))
+                ->setCoverImage(sprintf('https://picsum.photos/1000/350?random=%d', $faker->numberBetween(1, 10000)))
                 ->setIntroduction($faker->paragraph(2))
                 ->setContent('<p>' . implode('</p><p>', $faker->paragraphs(5)) . '</p>')
                 ->setPrice((string) $faker->numberBetween(40, 300))
@@ -164,7 +180,7 @@ class AppFixtures extends Fixture
             for ($j = 0; $j < $faker->numberBetween(2, 5); $j++) {
                 $image = new Image();
                 $image
-                    ->setUrl($faker->imageUrl(800, 600, 'architecture'))
+                    ->setUrl(sprintf('https://picsum.photos/800/600?random=%d', $faker->numberBetween(1, 10000)))
                     ->setCaption($faker->sentence())
                     ->setPosition($j)
                     ->setIsPrimary($j === 0)
@@ -251,5 +267,16 @@ class AppFixtures extends Fixture
     private function getGravatar(string $email): string
     {
         return 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($email))) . '?s=80&d=mp&r=g';
+    }
+
+    private function generatePhoneNumber(Generator $faker): string
+    {
+        return sprintf(
+            '+33 6 %02d %02d %02d %02d',
+            $faker->numberBetween(10, 99),
+            $faker->numberBetween(10, 99),
+            $faker->numberBetween(10, 99),
+            $faker->numberBetween(10, 99),
+        );
     }
 }

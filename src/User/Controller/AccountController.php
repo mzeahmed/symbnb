@@ -18,6 +18,9 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
+/**
+ * @deprecated
+ */
 class AccountController extends AbstractController
 {
     public function __construct(private readonly UserService $userService)

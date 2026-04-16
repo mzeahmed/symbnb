@@ -35,6 +35,34 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
+    public function getAvailableSlug(string $baseSlug, ?int $excludedUserId = null): string
+    {
+        $slug = $baseSlug;
+        $suffix = 2;
+
+        while ($this->slugExists($slug, $excludedUserId)) {
+            $slug = sprintf('%s-%d', $baseSlug, $suffix);
+            ++$suffix;
+        }
+
+        return $slug;
+    }
+
+    public function slugExists(string $slug, ?int $excludedUserId = null): bool
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->andWhere('u.slug = :slug')
+            ->setParameter('slug', $slug);
+
+        if ($excludedUserId !== null) {
+            $qb->andWhere('u.id != :excludedUserId')
+                ->setParameter('excludedUserId', $excludedUserId);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
+    }
+
     public function findBestUsers(int $limit = 2)
     {
         return $this->createQueryBuilder('u')

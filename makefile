@@ -51,8 +51,8 @@ db-shell: ## Open a database shell
 reset-db: ## Reset the database
 	$(PHP) bin/console doctrine:database:drop --force
 	$(PHP) bin/console doctrine:database:create
-	$(PHP) bin/console doctrine:migrations:migrate
-	$(PHP) bin/console doctrine:fixtures:load
+	$(PHP) bin/console doctrine:migrations:migrate --no-interaction
+	$(PHP) bin/console doctrine:fixtures:load --no-interaction
 
 pint: ## Run Pint
 	@echo "$(GREEN)Running Pint$(NO_COLOR)"
@@ -64,3 +64,14 @@ pintf: ## Run Pint and fix
 
 entity: ## Generate an entity
 	$(PHP) bin/console make:entity
+
+w: ## Watch assets changes
+	npm run watch
+
+b: ## Build assets
+	npm run build
+
+lint: ## Run Symfony's linter
+	$(PHP) bin/console lint:twig templates
+	$(PHP) bin/console lint:yaml config
+	$(PHP) bin/console lint:container

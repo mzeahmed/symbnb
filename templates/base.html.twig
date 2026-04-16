@@ -1,33 +1,63 @@
 <!DOCTYPE html>
 <html lang="{{ app.request.locale }}">
     <head>
-        <meta charset="UTF-8">
-        <title>SymBNB - {% block title %}Welcome!{% endblock %}</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        <meta name="viewport" content="width=device-width, user-scalable=no">
+        <meta charset="UTF-8">
+        <title>{% block title %}Symbnb - Find Your Perfect Stay{% endblock %}</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="robots" content="noindex, nofollow">
 
-        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
-              integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
-              crossorigin="anonymous">
+        {% block seo %}{% endblock %}
 
-        <link rel="stylesheet" href="{{ asset('build/app.css') }}">
-        {#gestion du probleme de chargement des packages via webpack#}
-        {{ encore_entry_link_tags('app') }}
+        <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest' };</script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-        {% block stylesheets %}{% endblock %}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
+        {% endblock %}
+
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
+        {% endblock %}
     </head>
-    <body>
-        {% include 'partials/header.html.twig' %}
 
-        {% block body %}{% endblock %}
+    {% set currentRoute = app.request.attributes.get('_route') %}
+    {% set isLoginPage = currentRoute == 'app_login' %}
+    {% set isRegisterPage = currentRoute in ['account_register', 'app_register'] %}
+    {% set pageBody %}{% block body %}{% endblock %}{% endset %}
 
-        {% include 'partials/footer.html.twig' %}
+    <body class="font-sans bg-white text-gray-900 {{ (isLoginPage or isRegisterPage) ? 'h-screen overflow-hidden' : '' }}">
+        <div class="fixed top-4 left-1/2 z-[100] w-full max-w-2xl -translate-x-1/2 px-4 sm:px-6 lg:px-8 pointer-events-none">
+            {% for label, messages in app.flashes %}
+                <div class="mb-3 pointer-events-auto rounded-lg border px-4 py-3 shadow-lg bg-{{ label == 'success' ? 'green' : label == 'error' ? 'red' : 'blue' }}-50 border-{{ label == 'success' ? 'green' : label == 'error' ? 'red' : 'blue' }}-200">
+                    {% for message in messages %}
+                        <p class="text-{{ label == 'success' ? 'green' : label == 'error' ? 'red' : 'blue' }}-800">{{ message | raw }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
 
-        <script src="{{ asset('build/app.js') }}"></script>
-        {#gestion du probleme de chargement des packages via webpack#}
-        {{ encore_entry_script_tags('app') }}
+        {% if not isLoginPage and not isRegisterPage %}
+            {% include 'partials/_header.html.twig' %}
+        {% endif %}
 
-        {% block javascripts %}{% endblock %}
+        {% if isLoginPage or isRegisterPage %}
+            {{ pageBody }}
+        {% else %}
+            <main id="main-content">
+                {{ pageBody }}
+            </main>
+        {% endif %}
+
+
+        {% if not isLoginPage and not isRegisterPage %}
+            {% include 'partials/_footer.html.twig' %}
+        {% endif %}
     </body>
 </html>

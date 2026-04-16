@@ -1,0 +1,22 @@
+@use 'loader';
+
+@import "tailwindcss";
+
+@source not "../../public";
+
+@theme {
+  --loader-accent-color: #0d6efd;
+  --color-coral: #FF5A5F;
+  --color-coral-dark: #E0484D;
+  --font-sans: 'Inter', sans-serif;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  .d-none {
+    display: none !important;
+  }
+}

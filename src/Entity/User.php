@@ -39,6 +39,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    /** Not persisted – used only for form validation */
+    private ?string $passwordConfirm = null;
+
     #[ORM\Column(length: 255, unique: true, nullable: true)]
     private ?string $slug = null;
 
@@ -81,6 +84,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $favorites;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $phone = null;
 
     public function __construct()
     {
@@ -159,6 +165,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    public function getPasswordConfirm(): ?string
+    {
+        return $this->passwordConfirm;
+    }
+
+    public function setPasswordConfirm(?string $passwordConfirm): static
+    {
+        $this->passwordConfirm = $passwordConfirm;
 
         return $this;
     }
@@ -306,5 +324,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getFavorites(): Collection
     {
         return $this->favorites;
+    }
+
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(?string $phone): static
+    {
+        $this->phone = $phone;
+
+        return $this;
     }
 }

@@ -1,0 +1,62 @@
+<header id="header" class="sticky top-0 z-50 bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+            <!-- Logo -->
+            <a href="{{ path('app_home') }}" class="flex items-center space-x-2">
+                <i class="fa-solid fa-home text-coral text-3xl"></i>
+                <span class="text-2xl font-bold text-coral">SymBnb</span>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-8">
+                <a href="{{ path('ads_index') }}" class="text-gray-700 hover:text-coral transition">Explore</a>
+                <a href="#" class="text-gray-700 hover:text-coral transition">Saved</a>
+                <a href="#" class="text-gray-700 hover:text-coral transition">Trips</a>
+                <a href="{{ path('ads_create') }}" class="text-gray-700 hover:text-coral transition">Host your home</a>
+            </nav>
+
+            <!-- Right Actions -->
+            <div class="flex items-center space-x-4">
+                {% if app.user %}
+                    <a href="{{ path('host_request') }}" class="hidden md:block text-gray-700 hover:text-coral transition">Become a Host</a>
+                {% else %}
+                    <a href="{{ path('app_register') }}" class="hidden md:block text-gray-700 hover:text-coral transition">Become a Host</a>
+                {% endif %}
+                <button class="p-2 hover:bg-gray-100 rounded-full transition">
+                    <i class="fa-solid fa-globe text-gray-700"></i>
+                </button>
+
+                {% if app.user %}
+                    <!-- User Dropdown -->
+                    <div class="relative group">
+                        <div class="flex items-center space-x-2 border border-gray-300 rounded-full px-4 py-2 hover:shadow-md transition cursor-pointer">
+                            <i class="fa-solid fa-bars text-gray-700"></i>
+                            <i class="fa-solid fa-user-circle text-gray-700 text-2xl"></i>
+                        </div>
+
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 mt-0 w-48 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition duration-200">
+                            <a href="{{ path('account_index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                My Account
+                            </a>
+                            <a href="{{ path('account_bookings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                My Bookings
+                            </a>
+                            <a href="{{ path('account_profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Edit Profile
+                            </a>
+                            <hr class="border-gray-200">
+                            <a href="{{ path('account_logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Logout</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Auth Buttons -->
+                    <div class="flex items-center space-x-2 border border-gray-300 rounded-full px-4 py-2 hover:shadow-md transition cursor-pointer">
+                        <a href="{{ path('account_login') }}" class="text-gray-700 hover:text-coral transition">Sign in</a>
+                        <i class="fa-solid fa-user-circle text-gray-700 text-2xl"></i>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>

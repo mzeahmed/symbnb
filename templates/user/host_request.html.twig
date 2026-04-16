@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Become a Host - StayNest{% endblock %}
+
+{% block body %}
+    <section class="py-20">
+        <div class="max-w-2xl mx-auto px-4 text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-coral/10 rounded-full mb-6">
+                <i class="fa-solid fa-house-chimney text-coral text-3xl"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Become a Host</h1>
+            <p class="text-lg text-gray-600 mb-8">
+                Share your space and earn extra income. This feature is coming soon — we'll notify you when it's ready!
+            </p>
+            <a href="{{ path('homepage') }}" class="inline-block bg-coral hover:bg-coral-dark text-white font-semibold px-8 py-3.5 rounded-xl transition-colors duration-200 shadow">
+                Back to Home
+            </a>
+        </div>
+    </section>
+{% endblock %}
+
