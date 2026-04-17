@@ -30,9 +30,9 @@
                         "The easiest way to find and book unique places to stay around the world."
                     </h2>
                     <div class="flex items-center gap-3">
-                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" alt="User" class="w-10 h-10 rounded-full border-2 border-white/20">
+                        <img src="{{ user.avatar }}" alt="User" class="w-10 h-10 rounded-full border-2 border-white/20">
                         <div>
-                            <p class="text-white font-medium text-sm">Ahmed Mze</p>
+                            <p class="text-white font-medium text-sm">{{ user.fullName }}</p>
                             <p class="text-white/70 text-xs">Travel Blogger</p>
                         </div>
                     </div>

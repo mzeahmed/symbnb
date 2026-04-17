@@ -51,13 +51,13 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function slugExists(string $slug, ?int $excludedUserId = null): bool
     {
         $qb = $this->createQueryBuilder('u')
-            ->select('COUNT(u.id)')
-            ->andWhere('u.slug = :slug')
-            ->setParameter('slug', $slug);
+                   ->select('COUNT(u.id)')
+                   ->andWhere('u.slug = :slug')
+                   ->setParameter('slug', $slug);
 
         if ($excludedUserId !== null) {
             $qb->andWhere('u.id != :excludedUserId')
-                ->setParameter('excludedUserId', $excludedUserId);
+               ->setParameter('excludedUserId', $excludedUserId);
         }
 
         return (int) $qb->getQuery()->getSingleScalarResult() > 0;
@@ -75,5 +75,21 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                     ->setMaxResults($limit)
                     ->getQuery()
                     ->getResult();
+    }
+
+    public function getUserBy(mixed $identifier): ?User
+    {
+        $column = is_numeric($identifier) ? 'id' : 'email';
+
+        return $this->findOneBy([$column => $identifier]);
+    }
+
+    public function getOneRandomUser(): ?User
+    {
+        $qb = $this->createQueryBuilder('u')
+                   ->orderBy('RAND()', 'ASC')
+                   ->setMaxResults(1);
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 }
