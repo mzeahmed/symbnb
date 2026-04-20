@@ -1,14 +1,14 @@
 {% block _ad_images_widget %}
-    <p>Ici, vous pouvez ajouter vos propres images !</p>
+    <p class="text-muted mb-3">Add your own images here!</p>
 
     {{ form_widget(form) }}
 
     <input type="hidden" id="widgets-counter" value="0">
 
-    <div class="form-group">
-        <button type="button" id="add-image" class="btn btn-primary">
+    <div class="mb-3">
+        <button type="button" id="add-image" class="btn btn-coral btn-sm d-inline-flex align-items-center gap-2">
             <i class="fas fa-plus"></i>
-            Ajouter une image
+            Add an image
         </button>
     </div>
 {% endblock %}
@@ -18,20 +18,17 @@
 {% endblock %}
 
 {% block _ad_images_entry_widget %}
-    <div class="form-group" id="block_{{ id }}">
-        <div class="row">
-            <div class="col-10">
-                <div class="row">
-                    <div class="col">
-                        {{ form_widget(form.url) }}
-                    </div>
-                    <div class="col">
-                        {{ form_widget(form.caption) }}
-                    </div>
+    <div class="mb-3" id="block_{{ id }}">
+        <div class="d-flex gap-3 align-items-center">
+            <div class="flex-fill">
+                <div class="row g-3">
+                    <div class="col">{{ form_widget(form.url) }}</div>
+                    <div class="col">{{ form_widget(form.caption) }}</div>
                 </div>
             </div>
-            <div class="col-2">
-                <button type="button" data-action="delete" data-target="#block_{{ id }}" class="btn btn-danger">X</button>
+            <div class="flex-shrink-0">
+                <button type="button" data-action="delete" data-target="#block_{{ id }}"
+                        class="btn btn-danger btn-sm">X</button>
             </div>
         </div>
     </div>

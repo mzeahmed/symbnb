@@ -430,6 +430,17 @@ class Ad
         return $this->comments;
     }
 
+    public function getAvgRatings(): float
+    {
+        if ($this->comments->isEmpty()) {
+            return 0;
+        }
+
+        $sum = array_sum($this->comments->map(fn ($c) => $c->getRating())->toArray());
+
+        return $sum / $this->comments->count();
+    }
+
     public function addComment(Comment $comment): self
     {
         if (!$this->comments->contains($comment)) {

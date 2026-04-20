@@ -1,111 +1,119 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Réservation n°{{ booking.id }}{% endblock %}
+{% block title %}Booking #{{ booking.id }}{% endblock %}
 
 {% block body %}
-
     {% set ad = booking.ad %}
     {% set author = ad.author %}
 
-    <div class="container">
-        <h1 class="my-5">Votre réservation (n°{{ booking.id }})</h1>
+    <div class="container py-5" style="max-width: 960px;">
+        <h1 class="fw-bold text-dark mb-5">Your booking (#{{ booking.id }})</h1>
 
         {% if app.request.query.get('withAlert') %}
-            <div class="alert alert-success">
-                <h4 class="alert-heading">Bravo</h4>
-                <p>
-                    Votre réservation auprès de
-                    <strong>
-                        <a href="{{ path('user_show', {'slug': author.slug}) }}">{{ author.fullName }}</a>
-                    </strong>
-                    pour l'annonce
-                    <strong>
-                        <a href="{{ path('ads_show', {'slug': ad.slug}) }}">{{ ad.title }}</a>
-                    </strong>
-                    a bien été prise en compte !
+            <div class="alert alert-success mb-5">
+                <h6 class="fw-semibold mb-1">Congratulations!</h6>
+                <p class="mb-0">
+                    Your booking with
+                    <strong><a href="{{ path('user_show', {'slug': author.slug}) }}" class="alert-link">{{ author.fullName }}</a></strong>
+                    for
+                    <strong><a href="{{ path('ads_show', {'slug': ad.slug}) }}" class="alert-link">{{ ad.title }}</a></strong>
+                    has been confirmed!
                 </p>
             </div>
         {% endif %}
 
-        <div class="row">
-            <div class="col">
-                <div class="alert alert-light">
-                    <h2>Détails</h2>
-                    <dl class="row">
-                        <dt class="col-md-4">Numéro</dt>
-                        <dd class="col-md-8">{{ booking.id }}</dd>
-                        <dt class="col-md-4">Date D'arrivée</dt>
-                        <dd class="col-md-8">{{ booking.startDate | date('d/m/Y') }}</dd>
-                        <dt class="col-md-4">Date de départ</dt>
-                        <dd class="col-md-8">{{ booking.endDate | date('d/m/Y') }}</dd>
-                        <dt class="col-md-4">Nombre de nuits</dt>
-                        <dd class="col-md-8">{{ booking.duration }}</dd>
-                        <dt class="col-md-4">Montant total</dt>
-                        <dd class="col-md-8">{{ booking.amount | number_format(2, ',', ' ') }} &euro;</dd>
-                        <dt class="col-md-4">Commentaire</dt>
-                        <dd class="col-md-8">{{ booking.comment | default('Aucun commentaire') }}</dd>
-                    </dl>
+        <div class="row g-4">
 
-                    <hr>
+            <div class="col-12 col-lg-8 d-flex flex-column gap-4">
+                <div class="card border shadow-soft">
+                    <div class="card-body p-4">
+                        <h5 class="fw-semibold text-dark mb-4">Details</h5>
+                        <dl>
+                            <div class="row py-2 border-bottom">
+                                <dt class="col-5 small fw-medium text-muted">Number</dt>
+                                <dd class="col-7 small text-dark mb-0">{{ booking.id }}</dd>
+                            </div>
+                            <div class="row py-2 border-bottom">
+                                <dt class="col-5 small fw-medium text-muted">Check-in</dt>
+                                <dd class="col-7 small text-dark mb-0">{{ booking.startDate|date('d/m/Y') }}</dd>
+                            </div>
+                            <div class="row py-2 border-bottom">
+                                <dt class="col-5 small fw-medium text-muted">Check-out</dt>
+                                <dd class="col-7 small text-dark mb-0">{{ booking.endDate|date('d/m/Y') }}</dd>
+                            </div>
+                            <div class="row py-2 border-bottom">
+                                <dt class="col-5 small fw-medium text-muted">Nights</dt>
+                                <dd class="col-7 small text-dark mb-0">{{ booking.duration }}</dd>
+                            </div>
+                            <div class="row py-2 border-bottom">
+                                <dt class="col-5 small fw-medium text-muted">Total amount</dt>
+                                <dd class="col-7 small fw-semibold text-dark mb-0">{{ booking.amount|number_format(2, ',', ' ') }} &euro;</dd>
+                            </div>
+                            <div class="row py-2">
+                                <dt class="col-5 small fw-medium text-muted">Comment</dt>
+                                <dd class="col-7 small text-dark mb-0">{{ booking.comment|default('No comment') }}</dd>
+                            </div>
+                        </dl>
 
-                    <h2 class="alert-heading">Votre hôte</h2>
-                    <div class="row mb-3">
-                        <div class="col-3">
-                            <img src="{{ author.picture }}" class="avatar avatar-medium" alt="{{ author.fullName }}">
+                        <hr class="my-4">
+
+                        <h5 class="fw-semibold text-dark mb-4">Your host</h5>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <img src="{{ author.avatar }}" class="rounded-circle object-fit-cover"
+                                 style="width: 3rem; height: 3rem;" alt="{{ author.fullName }}">
+                            <div>
+                                <h6 class="fw-semibold text-dark mb-0">
+                                    <a href="{{ path('user_show', {'slug': author.slug}) }}" class="text-dark text-decoration-none">{{ author.fullName }}</a>
+                                </h6>
+                                <span class="badge bg-coral mt-1">{{ author.ads|length }} ads</span>
+                            </div>
                         </div>
-                        <div class="col-9">
-                            <h4>
-                                <a href="{{ path('user_show', {'slug': author.slug}) }}">{{ author.fullname }}</a>
-                            </h4>
-
-                            <span class="badge badge-primary">{{ author.ads | length }} annonces</span>
-                        </div>
+                        {{ author.bio|default('')|raw }}
+                        <a href="{{ path('user_show', {'slug': author.slug}) }}"
+                           class="btn btn-coral btn-sm mt-3">More about {{ author.firstName }}</a>
                     </div>
-                    {{ author.description | raw }}
-
-                    <a href="{{ path('user_show', {'slug': author.slug}) }}" class="btn btn-primary">Plus d'info
-                        sur {{ author.firstname }}</a>
                 </div>
 
-                <div class="alert alert-light" id="comment">
-                    <h2 class="alert-heading">Votre avis compte</h2>
-                    {% if date() > date(booking.endDate) %}
-                        {% set comment = booking.ad.commentFromAuthor(app.user) %}
-                        {% if comment is not null %}
-                            <blockquote>
-                                {{ comment.content }}
-                            </blockquote>
-
-                            <strong>Note : </strong> {% include 'partials/rating.html.twig' with{'rating': comment.rating} %}
+                <div class="card border shadow-soft" id="comment">
+                    <div class="card-body p-4">
+                        <h5 class="fw-semibold text-dark mb-4">Your review matters</h5>
+                        {% if date() > date(booking.endDate) %}
+                            {% set comment = booking.ad.commentFromAuthor(app.user) %}
+                            {% if comment is not null %}
+                                <blockquote class="fst-italic text-secondary border-start border-4 ps-3 mb-3">
+                                    {{ comment.content }}
+                                </blockquote>
+                                <strong class="small text-muted">Rating: </strong>
+                                {% include 'partials/_rating.html.twig' with {'rating': comment.rating} %}
+                            {% else %}
+                                {{ form_start(form) }}
+                                {{ form_widget(form) }}
+                                <button class="btn btn-success d-inline-flex align-items-center gap-2 mt-3">Confirm</button>
+                                {{ form_end(form) }}
+                            {% endif %}
                         {% else %}
-                            {{ form_start(form) }}
-                            {{ form_widget(form) }}
-                            <button class="btn btn-success">Confirmer</button>
-                            {{ form_end(form) }}
+                            <p class="text-muted mb-0">You won't be able to rate this ad until your stay is complete.</p>
                         {% endif %}
-
-                    {% else %}
-                        <p>Vous ne pourrez pas noter cette annonce tant que votre voyage ne sera pas complet !</p>
-                    {% endif %}
-                </div>
-
-            </div>
-            <div class="col">
-                <div class="alert alert-light">
-                    <h2 class="alert-heading">Votre hébergement</h2>
-
-                    <h4>
-                        <a href="{{ path('ads_show', {'slug': ad.slug}) }}">{{ ad.title }}</a>
-                    </h4>
-
-                    <img src="{{ ad.coverImage }}" alt=" Image de {{ ad.title }}" class="img-fluid">
-
-                    {{ ad.content | raw }}
-
-                    <a href="{{ path('ads_show', {'slug': ad.slug}) }}" class="btn btn-primary">Plus d'informations</a>
+                    </div>
                 </div>
             </div>
+
+            <aside class="col-12 col-lg-4">
+                <div class="card border shadow-soft sticky-top" style="top: 80px;">
+                    <div class="card-body p-4">
+                        <h5 class="fw-semibold text-dark mb-3">Your accommodation</h5>
+                        <h6 class="fw-medium text-dark mb-3">
+                            <a href="{{ path('ads_show', {'slug': ad.slug}) }}" class="text-dark text-decoration-none">{{ ad.title }}</a>
+                        </h6>
+                        <img src="{{ ad.coverImage }}" alt="{{ ad.title }}"
+                             class="w-100 object-fit-cover rounded-3 h-48 mb-4">
+                        {{ ad.content|raw }}
+                        <a href="{{ path('ads_show', {'slug': ad.slug}) }}"
+                           class="btn btn-coral btn-sm mt-3">More information</a>
+                    </div>
+                </div>
+            </aside>
+
         </div>
     </div>
-
 {% endblock %}

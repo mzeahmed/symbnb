@@ -1,82 +1,63 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Réserver l'annonce : {{ ad.title }}{% endblock %}
+{% block title %}Book: {{ ad.title }}{% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css"/>
+    {{ parent() }}
+    {{ encore_entry_link_tags('booking') }}
 {% endblock %}
 
 {% block body %}
-    <div class="container">
-        <h1>Réserver pour l'annonce : <em>{{ ad.title }}</em></h1>
+    {% set disabledDates = [] %}
+    {% for day in ad.notAvailableDays %}
+        {% set disabledDates = disabledDates|merge([day.format('Y-m-d')]) %}
+    {% endfor %}
 
-        <p>Vous êtes sur le point de réserver le bien de <strong>{{ ad.author.fullName }}</strong>, dites nous tout, on
-            s'occupre du reste</p>
+    <div
+        id="booking-page"
+        class="container py-5"
+        style="max-width: 720px;"
+        data-disabled-dates="{{ disabledDates|json_encode|e('html_attr') }}"
+        data-price="{{ ad.price }}"
+    >
+        <h1 class="fw-bold text-dark mb-1">Book: <em class="fw-normal">{{ ad.title }}</em></h1>
+        <p class="text-muted mb-5">
+            You are about to book a property from <strong>{{ ad.author.fullName }}</strong> — tell us everything!
+        </p>
 
         {{ form_start(form) }}
-        <div class="alert alert-light">
-            <h2 class="h4">Commencez par nous dire quelles sont les dates qui vous intéressent</h2>
-            <div class="row">
-                <div class="col">
-                    {{ form_row(form.startDate) }}
-                </div>
-                <div class="col">
-                    {{ form_row(form.endDate) }}
-                </div>
-            </div>
-            <h4 class="mt-2">Montant du séjour : <span id="amount">...</span> &euro;</h4>
-            <span id="days">0</span> nuit(s) à {{ ad.price | number_format(2, ',', ' ') }} &euro; par nuit
 
-            <h4 class="mt-3">Vous avez un commentaire ?</h4>
-            {{ form_row(form.comment) }}
+        <div class="card border shadow-soft mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-semibold text-dark mb-4">Which dates interest you?</h5>
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-sm-6">{{ form_row(form.startDate) }}</div>
+                    <div class="col-12 col-sm-6">{{ form_row(form.endDate) }}</div>
+                </div>
+                <p class="text-dark fw-medium mb-4">
+                    Total amount: <span id="amount" class="text-coral fw-bold">...</span> &euro;
+                    <span class="text-muted small ms-2">(<span id="days">0</span> night(s) at {{ ad.price|number_format(2, ',', ' ') }} &euro; / night)</span>
+                </p>
+
+                <h5 class="fw-semibold text-dark mb-2">Do you have a comment?</h5>
+                {{ form_row(form.comment) }}
+            </div>
         </div>
 
-        <h2>Vous avez terminé !</h2>
-        <p>Vacances de rêve ? Hébergement pour le boulot , Peut importe, on est avec vous les amis</p>
+        <div class="mb-5">
+            <h2 class="fs-4 fw-bold text-dark mb-1">You're all set!</h2>
+            <p class="text-muted">Dream vacation or business trip — we've got you covered!</p>
+        </div>
 
-        <button type="submit" class="btn btn-success">Je réserve</button>
+        <button type="submit" class="btn btn-success btn-lg fw-semibold px-5">
+            Book now
+        </button>
 
         {{ form_end(form) }}
     </div>
 {% endblock %}
 
 {% block javascripts %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
-
-    <script>
-        $(document).ready(function () {
-            $('#booking_startDate, #booking_endDate').datepicker({
-                format: 'dd/mm/yyyy',
-                datesDisabled: [
-                    {% for day in ad.notAvailableDays %}
-                    "{{ day.format('d/m/Y') }}",
-                    {% endfor %}
-                ],
-                startDate: new Date()
-            });
-
-            $('#booking_startDate, #booking_endDate').on('change', calculateAmount);
-        });
-
-        function calculateAmount() {
-            // On chope les dates
-            const endDate = new Date($('#booking_endDate').val().replace(/(\d+)\/(\d+)\/(\d{4})/, '$3-$2-$1'));
-            // 18/09/2018
-            // (\d+)\/(\d+)\/(\d{4}) avec ces expressions régulieres on change le format de la date comme ceci
-            // 2018-09-18
-            const startDate = new Date($('#booking_startDate').val().replace(/(\d+)\/(\d+)\/(\d{4})/, '$3-$2-$1'));
-
-            if (startDate && endDate && startDate < endDate) {
-                const DAY_TIME = 24 * 60 * 60 * 1000;
-
-                const interval = endDate.getTime() - startDate.getTime();
-                const days = interval / DAY_TIME;
-                const amount = days * {{ ad.price }};
-
-                $('#days').text(days);
-                $('#amount').text(amount.toLocaleString('fr-FR'));
-            }
-        }
-    </script>
+    {{ parent() }}
+    {{ encore_entry_script_tags('booking') }}
 {% endblock %}

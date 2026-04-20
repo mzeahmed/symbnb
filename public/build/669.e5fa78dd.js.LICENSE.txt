@@ -1,1 +1,0 @@
-/*! @tailwindplus/elements v1.0.22 | Proprietary License | https://tailwindcss.com/plus/license */

@@ -33,6 +33,8 @@ Encore
    */
   .addEntry('app', './assets/app.ts')
   .addEntry('security', './assets/scripts/features/security/security.ts')
+  .addEntry('booking', './assets/scripts/features/booking/booking.ts')
+  .addEntry('ad', './assets/scripts/features/ad/ad.ts')
 
   // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
   .splitEntryChunks()

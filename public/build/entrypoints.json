@@ -2,24 +2,35 @@
   "entrypoints": {
     "app": {
       "js": [
-        "/build/runtime.1b5762f4.js",
-        "/build/550.f530ae39.js",
-        "/build/669.e5fa78dd.js",
-        "/build/app.0672a104.js"
+        "/build/runtime.js",
+        "/build/vendors-node_modules_core-js_modules_es_array_from_js-node_modules_core-js_modules_es_array_i-742664.js",
+        "/build/vendors-node_modules_bootstrap_dist_js_bootstrap_esm_js-node_modules_notyf_notyf_min_css-node-01710e.js",
+        "/build/app.js"
       ],
       "css": [
-        "/build/app.657d4e2b.css"
+        "/build/app.css"
       ]
     },
     "security": {
       "js": [
-        "/build/runtime.1b5762f4.js",
-        "/build/550.f530ae39.js",
-        "/build/189.776f5b97.js",
-        "/build/security.a535106b.js"
+        "/build/runtime.js",
+        "/build/vendors-node_modules_core-js_modules_es_array_from_js-node_modules_core-js_modules_es_array_i-742664.js",
+        "/build/vendors-node_modules_notyf_notyf_min_css-node_modules_notyf_notyf_es_js-node_modules_core-js_-d279c6.js",
+        "/build/security.js"
       ],
       "css": [
-        "/build/security.cd9b3258.css"
+        "/build/security.css"
+      ]
+    },
+    "booking": {
+      "js": [
+        "/build/runtime.js",
+        "/build/vendors-node_modules_core-js_modules_es_array_from_js-node_modules_core-js_modules_es_array_i-742664.js",
+        "/build/vendors-node_modules_flatpickr_dist_esm_index_js-node_modules_flatpickr_dist_l10n_fr_js-node_-32f9fc.js",
+        "/build/booking.js"
+      ],
+      "css": [
+        "/build/vendors-node_modules_flatpickr_dist_esm_index_js-node_modules_flatpickr_dist_l10n_fr_js-node_-32f9fc.css"
       ]
     }
   }
