@@ -1,61 +1,66 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Création d'une annonce{% endblock %}
+{% block title %}Create an ad{% endblock %}
 
 {% form_theme form 'ad/_collection.html.twig' %}
 
 {% block body %}
-
-    <div class="container">
-        <h1 class="my-5">Créer une nouvelle annonce</h1>
+    <div class="container py-5" style="max-width: 960px;">
+        <h1 class="fw-bold text-dark mb-5">Create a new ad</h1>
 
         {{ form_start(form) }}
 
-        <div class="row">
-            <div class="col">
-                <div class="alert alert-light">
-                    <h2>Informations générales</h2>
-                    <hr>
-                    {{ form_row(form.title) }}
-                    {{ form_row(form.slug) }}
-                    {{ form_row(form.price) }}
-                    {{ form_row(form.rooms) }}
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-md-6 d-flex flex-column gap-4">
+                <div class="card border shadow-soft">
+                    <div class="card-body p-4">
+                        <h5 class="fw-semibold text-dark mb-1">General Information</h5>
+                        <hr class="mb-4">
+                        {{ form_row(form.title) }}
+                        {{ form_row(form.slug) }}
+                        {{ form_row(form.price) }}
+                        {{ form_row(form.rooms) }}
+                    </div>
                 </div>
-                <div class="alert alert-light">
-                    <h2>Détails de l'annonce</h2>
-                    <hr>
-                    {{ form_row(form.introduction) }}
-                    {{ form_row(form.content) }}
+                <div class="card border shadow-soft">
+                    <div class="card-body p-4">
+                        <h5 class="fw-semibold text-dark mb-1">Ad Details</h5>
+                        <hr class="mb-4">
+                        {{ form_row(form.introduction) }}
+                        {{ form_row(form.content) }}
+                    </div>
                 </div>
             </div>
-            <div class="col">
-                <div class="alert alert-light">
-                    <h2>Image de l'annonce</h2>
-                    <hr>
-                    {{ form_row(form.coverImage) }}
-                    {{ form_row(form.images) }}
+            <div class="col-12 col-md-6">
+                <div class="card border shadow-soft">
+                    <div class="card-body p-4">
+                        <h5 class="fw-semibold text-dark mb-1">Ad Images</h5>
+                        <hr class="mb-4">
+                        {{ form_row(form.coverImage) }}
+                        {{ form_row(form.images) }}
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="alert alert-success clearfix">
-            <h2 class="alert-heading">Sauvegarder mon annonce</h2>
-            <p>Vous êtes sur le point de créer votre annonce, nouis sommes super fier de vous !</p>
-            <button type="submit" class="btn btn-primary float-right">
-                <i class="fas fa-check"></i>
-                Créer la nouvelle annonce
-            </button>
+        <div class="card border border-success bg-success bg-opacity-10">
+            <div class="card-body p-4 d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-3">
+                <div>
+                    <h5 class="fw-semibold text-dark mb-1">Save my ad</h5>
+                    <p class="text-muted small mb-0">You're about to create your ad — we're so proud of you!</p>
+                </div>
+                <button type="submit" class="btn btn-coral d-inline-flex align-items-center gap-2 flex-shrink-0">
+                    <i class="fas fa-check"></i>
+                    Create ad
+                </button>
+            </div>
         </div>
 
         {{ form_end(form) }}
     </div>
-
 {% endblock %}
 
 {% block javascripts %}
-
-    <script src="{{ asset('build/ad.js') }}"></script>
-    {#gestion du probleme de chargement des packages via webpack#}
+    {{ parent() }}
     {{ encore_entry_script_tags('ad') }}
-
 {% endblock %}

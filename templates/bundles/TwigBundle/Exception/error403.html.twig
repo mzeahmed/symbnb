@@ -1,16 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Vous n'avez pas lez droit d'acceder à cette ressource{% endblock %}
+{% block title %}Access denied{% endblock %}
 
 {% block body %}
-
-    <div class="container">
-        <h1>Alors ? Vous essayez de bousiller le site ?!</h1>
-        <div class="alert alert-danger">
-            <p>Vous n'avez pas lez droit d'acceder à cette ressource !</p>
+    <div class="container py-5 text-center" style="max-width: 640px;">
+        <h1 class="display-1 fw-bold text-muted">403</h1>
+        <h2 class="fw-bold text-dark mb-3">Access denied!</h2>
+        <div class="alert alert-danger mx-auto mb-5" style="max-width: 480px;">
+            <p class="mb-0">You don't have permission to access this resource.</p>
         </div>
-
-        <a href="{{ path('homepage') }}" class="btn btn-primary">Retour à l'accueil</a>
+        <a href="{{ path('app_home') }}" class="btn btn-primary">Back to home</a>
     </div>
-
 {% endblock %}

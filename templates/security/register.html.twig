@@ -8,130 +8,118 @@
 {% endblock %}
 
 {% block body %}
-    <div class="bg-gray-50 min-h-screen flex flex-col m-0 p-0">
-        <main class="flex-grow flex flex-col md:flex-row min-h-screen">
-            <section class="hidden md:flex md:w-5/12 lg:w-1/2 relative bg-gray-900 overflow-hidden items-center justify-center">
-                <div class="absolute inset-0 z-0">
-                    <img src="{{ asset('build/images/register-image.avif') }}" alt="Beautiful apartment interior" class="w-full h-full object-cover opacity-60">
+    <div class="d-flex flex-column flex-md-row min-vh-100 bg-light">
+
+        {# ── Left panel ── #}
+        <section class="register-left-panel flex-column align-items-center justify-content-center position-relative bg-dark overflow-hidden"
+                 style="width: 42%; min-width: 340px;">
+            <div class="position-absolute top-0 start-0 w-100 h-100">
+                <img src="{{ asset('build/images/register-image.avif') }}" alt="Beautiful apartment interior"
+                     class="w-100 h-100 object-fit-cover opacity-75">
+            </div>
+            <div class="position-relative text-white px-5 py-5" style="max-width: 520px; z-index: 1;">
+                <h1 class="display-5 fw-bold mb-4 lh-base">
+                    Find your next<br>perfect stay.
+                </h1>
+                <p class="lead text-white-75 mb-5 fw-light lh-relaxed">
+                    Join millions of hosts and guests experiencing the world together.
+                    Discover unique homes and experiences around the globe.
+                </p>
+
+                <div class="d-flex align-items-center gap-3 mt-4">
+                    <div class="d-flex" style="margin-left: -0.5rem;">
+                        {% for item in bestUsers %}
+                            {% set user = item.user %}
+                            <img class="rounded-circle border border-2 border-white object-fit-cover"
+                                 style="width: 2.5rem; height: 2.5rem; margin-left: -0.5rem;"
+                                 src="{{ user.avatar }}"
+                                 alt="{{ user.firstName }} {{ user.lastName }}">
+                        {% endfor %}
+                        <div class="rounded-circle border border-2 border-white bg-dark d-flex align-items-center justify-content-center"
+                             style="width: 2.5rem; height: 2.5rem; margin-left: -0.5rem; font-size: 0.65rem; font-weight: 700;">
+                            +2M
+                        </div>
+                    </div>
+                    <span class="small fw-medium text-white-50">Hosts worldwide</span>
                 </div>
-                <div class="relative z-10 px-12 lg:px-20 text-white max-w-2xl">
-                    <h1 class="text-5xl lg:text-6xl font-bold mb-6 leading-tight tracking-tight">
-                        Find your next<br>perfect stay.
-                    </h1>
-                    <p class="text-lg lg:text-xl text-gray-200 mb-8 font-light leading-relaxed">
-                        Join millions of hosts and guests experiencing the world together. Discover unique homes and experiences around the
-                        globe.
-                    </p>
+            </div>
+        </section>
 
-                    <div class="flex items-center gap-4 mt-12">
-                        <div class="flex -space-x-4">
-                            {% for item in bestUsers %}
-                                {% set user = item.user %}
+        {# ── Right panel ── #}
+        <section class="register-right-panel flex-fill d-flex align-items-center justify-content-center p-4 p-lg-5 bg-white">
+            <div class="w-100" style="max-width: 480px;">
+                <div class="mb-5">
+                    <h2 class="fs-3 fw-bold text-dark mb-1">Create your account</h2>
+                    <p class="text-muted mb-0">Join SymBnb and start planning your next stay.</p>
+                </div>
 
-                                <img
-                                        class="w-10 h-10 rounded-full border-2 border-white object-cover"
-                                        src="{{ user.avatar }}"
-                                        alt="{{ user.firstName }} {{ user.lastName }}"
-                                >
-                            {% endfor %}
+                {{ form_start(form) }}
 
-                            <div class="w-10 h-10 rounded-full border-2 border-white bg-gray-800 flex items-center justify-center text-xs font-bold">
-                                +2M
-                            </div>
-                        </div>
-                        <div class="text-sm font-medium text-gray-300">Hosts worldwide</div>
+                {% if not form.vars.valid %}
+                    <div class="alert alert-danger small mb-4">
+                        {{ form_errors(form) }}
+                        {% for field in form %}
+                            {{ form_errors(field) }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label for="{{ form.firstName.vars.id }}" class="form-label fw-medium small">First Name</label>
+                        {{ form_widget(form.firstName, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label for="{{ form.lastName.vars.id }}" class="form-label fw-medium small">Last Name</label>
+                        {{ form_widget(form.lastName, {'attr': {'class': 'form-control'}}) }}
                     </div>
                 </div>
-            </section>
 
-            <section class="w-full md:w-7/12 lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-white">
-                <div class="w-full max-w-md">
-                    <div class="mb-8">
-                        <h2 class="text-3xl font-bold text-gray-900 mb-2">Create your account</h2>
-                        <p class="text-gray-500">Join SymBnb and start planning your next stay.</p>
-                    </div>
-
-                    {{ form_start(form, {'attr': {'class': 'space-y-5'}}) }}
-
-                    {% if not form.vars.valid %}
-                        <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 space-y-1">
-                            {{ form_errors(form) }}
-
-                            {% for field in form %}
-                                {{ form_errors(field) }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="space-y-1.5">
-                            <label for="{{ form.firstName.vars.id }}" class="block text-sm font-medium text-gray-700">First Name</label>
-                            {{ form_widget(form.firstName, {'attr': {'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900'}}) }}
-                            {{ form_errors(form.firstName) }}
-                        </div>
-                        <div class="space-y-1.5">
-                            <label for="{{ form.lastName.vars.id }}" class="block text-sm font-medium text-gray-700">Last Name</label>
-                            {{ form_widget(form.lastName, {'attr': {'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900'}}) }}
-                            {{ form_errors(form.lastName) }}
-                        </div>
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <label for="{{ form.email.vars.id }}" class="block text-sm font-medium text-gray-700">Email Address</label>
-                        {{ form_widget(form.email, {'attr': {'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900'}}) }}
-                        {{ form_errors(form.email) }}
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <label for="{{ form.phone.vars.id }}" class="block text-sm font-medium text-gray-700">Phone Number
-                            <span class="text-gray-400 font-normal">(Optional)</span></label>
-                        {{ form_widget(form.phone, {'attr': {'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900', 'placeholder': '+1 (555) 000-0000'}}) }}
-                        {{ form_errors(form.phone) }}
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <label for="{{ form.password.vars.id }}" class="block text-sm font-medium text-gray-700">Password</label>
-                        {{ form_widget(form.password, {'attr': {'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900'}}) }}
-                        {{ form_errors(form.password) }}
-                        <p class="text-xs text-gray-500 mt-1">Use 8 or more characters with a mix of letters, numbers and symbols.</p>
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <label for="{{ form.passwordConfirm.vars.id }}" class="block text-sm font-medium text-gray-700">Confirm
-                            Password</label>
-                        {{ form_widget(form.passwordConfirm, {'attr': {'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900'}}) }}
-                        {{ form_errors(form.passwordConfirm) }}
-                    </div>
-
-                    <button
-                            type="submit"
-                            class="w-full bg-coral hover:bg-coral-dark text-white font-semibold py-3.5 px-4 rounded-xl transition-colors duration-200 shadow mt-6 cursor-pointer"
-                            id="register-button"
-                    >
-                        Create Account
-                    </button>
-
-                    {{ form_end(form) }}
-
-                    <div class="flex items-center my-8">
-                        <div class="flex-grow h-px bg-gray-200"></div>
-                        <span class="px-4 text-sm text-gray-500 font-medium">or</span>
-                        <div class="flex-grow h-px bg-gray-200"></div>
-                    </div>
-
-                    <div class="space-y-3">
-                        <button type="button" class="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 text-gray-700 font-medium py-3 px-4 rounded-xl hover:bg-gray-50 transition-colors duration-200">
-                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
-                            Continue with Google
-                        </button>
-                    </div>
-
-                    <p class="text-center mt-8 text-gray-600 text-sm">
-                        Already have an account?
-                        <a href="{{ path('account_login') }}" class="text-coral font-semibold hover:underline">Sign in</a>
-                    </p>
+                <div class="mb-3">
+                    <label for="{{ form.email.vars.id }}" class="form-label fw-medium small">Email Address</label>
+                    {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
                 </div>
-            </section>
-        </main>
+
+                <div class="mb-3">
+                    <label for="{{ form.phone.vars.id }}" class="form-label fw-medium small">
+                        Phone Number <span class="text-muted fw-normal">(Optional)</span>
+                    </label>
+                    {{ form_widget(form.phone, {'attr': {'class': 'form-control', 'placeholder': '+1 (555) 000-0000'}}) }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.password.vars.id }}" class="form-label fw-medium small">Password</label>
+                    {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
+                    <div class="form-text">Use 8+ characters with letters, numbers and symbols.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.passwordConfirm.vars.id }}" class="form-label fw-medium small">Confirm Password</label>
+                    {{ form_widget(form.passwordConfirm, {'attr': {'class': 'form-control'}}) }}
+                </div>
+
+                <button type="submit" class="btn btn-coral w-100 py-3 fw-semibold mb-4" id="register-button">
+                    Create Account
+                </button>
+
+                {{ form_end(form) }}
+
+                <div class="d-flex align-items-center my-4">
+                    <hr class="flex-fill">
+                    <span class="px-3 text-muted small fw-medium">or</span>
+                    <hr class="flex-fill">
+                </div>
+
+                <button type="button" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-3 py-3 mb-4">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="d-none" style="width: 1.25rem; height: 1.25rem;" alt="Google">
+                    Continue with Google
+                </button>
+
+                <p class="text-center text-muted small mb-0">
+                    Already have an account?
+                    <a href="{{ path('app_login') }}" class="text-coral fw-semibold text-decoration-none">Sign in</a>
+                </p>
+            </div>
+        </section>
     </div>
 {% endblock %}

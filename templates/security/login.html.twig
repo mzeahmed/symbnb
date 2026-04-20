@@ -1,130 +1,117 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Login - StayNest{% endblock %}
+{% block title %}Sign In — SymBnb{% endblock %}
 
 {% block body %}
-    <section class="flex flex-col lg:flex-row h-screen w-full overflow-hidden">
-        <div class="hidden lg:flex lg:w-1/2 relative bg-gray-900 overflow-hidden">
-            <div class="absolute inset-0 w-full h-full">
-                <img
-                        src="{{ asset('build/images/login-image.avif') }}"
-                        alt="Beautiful travel destination"
-                        class="w-full h-full object-cover opacity-90"
-                >
-                <div class="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/20 to-transparent"></div>
+    <section class="d-flex flex-column flex-lg-row overflow-hidden" style="height: 100vh;">
+
+        {# ── Left panel ── #}
+        <div class="login-left-panel flex-column justify-content-between position-relative bg-dark overflow-hidden">
+            <img src="{{ asset('build/images/login-image.avif') }}" alt="Travel destination"
+                 class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover opacity-75">
+            <div class="position-absolute top-0 start-0 w-100 h-100"
+                 style="background: linear-gradient(to top, rgba(17,24,39,0.8) 0%, rgba(17,24,39,0.2) 50%, transparent 100%);"></div>
+
+            <div class="position-relative p-5 z-1">
+                <a href="{{ path('app_home') }}" class="d-flex align-items-center gap-2 text-white text-decoration-none">
+                    <div class="bg-coral rounded-3 d-flex align-items-center justify-content-center shadow"
+                         style="width: 2.5rem; height: 2.5rem;">
+                        <i class="fa-solid fa-house-chimney text-white"></i>
+                    </div>
+                    <span class="fs-4 fw-bold">SymBnb</span>
+                </a>
             </div>
 
-            <div class="relative z-10 p-12 flex flex-col justify-between h-full w-full">
-                <a href="{{ path('app_home') }}" class="flex items-center gap-2 text-white hover:opacity-90 transition-opacity">
-                    <div class="w-10 h-10 bg-coral rounded-xl flex items-center justify-center shadow-lg">
-                        <i class="fa-solid fa-house-chimney text-white text-xl"></i>
-                    </div>
-                    <span class="text-2xl font-bold tracking-tight">Symbnb</span>
-                </a>
-
-                <div class="max-w-md mb-12">
-                    <div class="flex gap-1 text-coral mb-4">
-                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                    </div>
-                    <h2 class="text-3xl font-semibold text-white leading-tight mb-4">
-                        "The easiest way to find and book unique places to stay around the world."
-                    </h2>
-                    <div class="flex items-center gap-3">
-                        <img src="{{ user.avatar }}" alt="User" class="w-10 h-10 rounded-full border-2 border-white/20">
+            <div class="position-relative p-5 pb-5 z-1" style="max-width: 480px;">
+                <div class="d-flex gap-1 text-coral mb-3">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                </div>
+                <h2 class="fs-3 fw-semibold text-white lh-base mb-4">
+                    "The easiest way to find and book unique places to stay around the world."
+                </h2>
+                {% if user is defined and user %}
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="{{ user.avatar }}" alt="{{ user.fullName }}"
+                             class="rounded-circle border border-2 border-white border-opacity-25 object-fit-cover"
+                             style="width: 2.5rem; height: 2.5rem;">
                         <div>
-                            <p class="text-white font-medium text-sm">{{ user.fullName }}</p>
-                            <p class="text-white/70 text-xs">Travel Blogger</p>
+                            <p class="text-white fw-medium small mb-0">{{ user.fullName }}</p>
+                            <p class="text-white-50 small mb-0">Travel Blogger</p>
                         </div>
                     </div>
-                </div>
+                {% endif %}
             </div>
         </div>
 
-        <div class="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-24 bg-white lg:bg-gray-50 overflow-hidden">
-            <div class="lg:hidden w-full max-w-[440px] flex justify-start mb-8">
-                <a href="{{ path('app_home') }}" class="flex items-center gap-2 text-gray-900">
-                    <div class="w-8 h-8 bg-coral rounded-lg flex items-center justify-center shadow-md">
-                        <i class="fa-solid fa-house-chimney text-white text-sm"></i>
+        {# ── Right panel ── #}
+        <div class="login-right-panel d-flex flex-column justify-content-center align-items-center p-4 p-sm-5 bg-white overflow-auto">
+            <div class="d-lg-none w-100 mb-4" style="max-width: 440px;">
+                <a href="{{ path('app_home') }}" class="d-flex align-items-center gap-2 text-dark text-decoration-none">
+                    <div class="bg-coral rounded-2 d-flex align-items-center justify-content-center shadow-sm"
+                         style="width: 2rem; height: 2rem;">
+                        <i class="fa-solid fa-house-chimney text-white small"></i>
                     </div>
-                    <span class="text-xl font-bold tracking-tight">SymBnb</span>
+                    <span class="fs-5 fw-bold">SymBnb</span>
                 </a>
             </div>
 
-            <div class="w-full max-w-[440px] bg-white rounded-[24px] lg:shadow-xl p-8 sm:p-10 border border-gray-100/80 relative z-10">
+            <div class="card border shadow-lg p-4 p-sm-5 w-100" style="max-width: 440px; border-radius: 1.5rem;">
                 {% if error %}
-                    <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <div class="alert alert-danger small mb-4">
                         {{ error.messageKey|trans(error.messageData, 'security') }}
                     </div>
                 {% endif %}
 
                 {% if app.user %}
-                    <div class="mb-6 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                    <div class="alert alert-info small mb-4">
                         You are logged in as {{ app.user.userIdentifier }},
-                        <a href="{{ logout_path() }}" class="font-semibold underline">Logout</a>
+                        <a href="{{ logout_path() }}" class="fw-semibold">Logout</a>
                     </div>
                 {% endif %}
 
-                <div class="mb-8 text-center sm:text-left">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Welcome back</h1>
-                    <p class="text-gray-500 text-sm">Sign in to continue your travel journey</p>
+                <div class="mb-4">
+                    <h1 class="fs-3 fw-bold text-dark mb-1">Welcome back</h1>
+                    <p class="text-muted small mb-0">Sign in to continue your travel journey</p>
                 </div>
 
-                <form method="post" class="space-y-5">
-                    <div class="space-y-1.5">
-                        <label for="username" class="block text-sm font-medium text-gray-700">Email address</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <i class="fa-regular fa-envelope text-gray-400"></i>
-                            </div>
-                            <input
-                                    type="email"
-                                    value="{{ last_username }}"
-                                    name="_username"
-                                    id="username"
-                                    autocomplete="email"
-                                    required
-                                    autofocus
-                                    class="block w-full pl-11 pr-4 py-3.5 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-coral/20 focus:border-coral transition-colors duration-200 shadow-sm"
-                                    placeholder="name@example.com"
-                            >
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label fw-medium small">Email address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fa-regular fa-envelope text-muted"></i>
+                            </span>
+                            <input type="email" value="{{ last_username }}" name="_username" id="username"
+                                   autocomplete="email" required autofocus
+                                   class="form-control border-start-0 ps-0"
+                                   placeholder="name@example.com">
                         </div>
                     </div>
 
-                    <div class="space-y-1.5">
-                        <div class="flex items-center justify-between">
-                            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                            <a href="#" class="text-sm font-medium text-coral hover:text-coral-dark transition-colors">Forgot password?</a>
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="password" class="form-label fw-medium small mb-0">Password</label>
+                            <a href="#" class="text-coral small text-decoration-none">Forgot password?</a>
                         </div>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <i class="fa-solid fa-lock text-gray-400"></i>
-                            </div>
-                            <input
-                                    type="password"
-                                    name="_password"
-                                    id="password"
-                                    autocomplete="current-password"
-                                    required
-                                    class="block w-full pl-11 pr-4 py-3.5 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-coral/20 focus:border-coral transition-colors duration-200 shadow-sm"
-                                    placeholder="••••••••"
-                            >
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fa-solid fa-lock text-muted"></i>
+                            </span>
+                            <input type="password" name="_password" id="password"
+                                   autocomplete="current-password" required
+                                   class="form-control border-start-0 ps-0"
+                                   placeholder="••••••••">
                         </div>
                     </div>
 
                     <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
 
-                    <button
-                            type="submit"
-                            class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-coral hover:bg-coral-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral transition-all duration-200 hover:shadow-md"
-                    >
-                        Sign in
-                    </button>
+                    <button type="submit" class="btn btn-coral w-100 py-3 fw-semibold">Sign in</button>
                 </form>
 
-                <p class="mt-8 text-center text-sm text-gray-600">
+                <p class="mt-4 text-center small text-muted mb-0">
                     Don't have an account?
-                    <a href="{{ path('account_register') }}" class="font-semibold text-coral hover:text-coral-dark transition-colors">Sign
-                        up</a>
+                    <a href="{{ path('app_register') }}" class="text-coral fw-semibold text-decoration-none">Sign up</a>
                 </p>
             </div>
         </div>

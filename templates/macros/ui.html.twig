@@ -1,0 +1,121 @@
+{# ═══════════════════════════════════════════════════════════
+   UI Macros — Bootstrap 5 Design System Components
+   Usage: {% from 'macros/ui.html.twig' import stat_card, ad_card, booking_item, nav_item %}
+   ═══════════════════════════════════════════════════════════ #}
+
+{% macro stat_card(icon, iconTheme, label, value, badge, badgeGreen) %}
+    <div class="col">
+        <div class="card border shadow-card card-hover h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div class="p-3 rounded-3 icon-theme-{{ iconTheme }} transition-colors">
+                        <i class="{{ icon }} fs-5"></i>
+                    </div>
+                    {% if badge %}
+                        <span class="badge {{ badgeGreen ? 'badge-success-soft' : 'badge-muted-soft' }} d-flex align-items-center gap-1 px-2 py-1">
+                            {% if badgeGreen %}<i class="fa-solid fa-arrow-trend-up"></i>{% endif %}
+                            {{ badge }}
+                        </span>
+                    {% endif %}
+                </div>
+                <p class="text-muted small fw-medium mb-1">{{ label }}</p>
+                <h3 class="fs-3 fw-bold text-main mb-0">{{ value }}</h3>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+
+{% macro ad_card(ad, isOwner) %}
+    <div class="card border shadow-card overflow-hidden h-100">
+        <div class="position-relative overflow-hidden h-40">
+            <img class="w-100 h-100 object-fit-cover transition-all"
+                 src="{{ ad.coverImage }}" alt="{{ ad.title }}"
+                 style="transition: transform 0.5s;">
+            <div class="img-gradient-overlay"></div>
+            <div class="position-absolute top-0 end-0 m-2 bg-white bg-opacity-90 px-2 py-1 rounded-2 small fw-semibold text-dark shadow-soft"
+                 style="backdrop-filter: blur(4px);">
+                {{ ad.price|number_format(2, ',', ' ') }} € / night
+            </div>
+            <div class="position-absolute top-0 start-0 m-2 px-2 py-1 rounded-2 small fw-medium text-white"
+                 style="background-color: rgba(16,185,129,0.9); backdrop-filter: blur(4px);">
+                Published
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6 class="fw-semibold text-main text-truncate pe-3 mb-0">{{ ad.title }}</h6>
+                {% if ad.comments|length > 0 %}
+                    <div class="d-flex align-items-center gap-1 small fw-medium flex-shrink-0">
+                        <i class="fa-solid fa-star text-warning" style="font-size: 0.75rem;"></i>
+                        {{ ad.avgRatings|number_format(1) }}
+                    </div>
+                {% else %}
+                    <span class="small text-muted flex-shrink-0">New</span>
+                {% endif %}
+            </div>
+
+            <p class="text-muted small mb-4 d-flex align-items-center gap-1">
+                <i class="fa-solid fa-door-open" style="font-size: 0.7rem;"></i>
+                {{ ad.rooms }} room{{ ad.rooms > 1 ? 's' : '' }}
+            </p>
+
+            <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                <span class="small text-muted">
+                    <span class="fw-semibold text-main">{{ ad.comments|length }}</span> reviews
+                </span>
+                <div class="d-flex gap-2">
+                    <a href="{{ path('ads_show', {'slug': ad.slug}) }}"
+                       class="btn btn-sm btn-outline-secondary">View</a>
+                    {% if isOwner %}
+                        <a href="{{ path('ads_edit', {'slug': ad.slug}) }}"
+                           class="btn btn-sm btn-primary">Manage</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+
+{% macro booking_item(booking) %}
+    {% set ad = booking.ad %}
+    {% if date() < date(booking.startDate) %}
+        {% set statusLabel = 'Upcoming' %}
+        {% set statusClass = 'badge-primary-soft' %}
+    {% elseif date() > date(booking.endDate) %}
+        {% set statusLabel = 'Completed' %}
+        {% set statusClass = 'badge-muted-soft' %}
+    {% else %}
+        {% set statusLabel = 'Confirmed' %}
+        {% set statusClass = 'badge-success-soft' %}
+    {% endif %}
+
+    <a href="{{ path('booking_show', {'id': booking.id}) }}"
+       class="d-flex gap-3 align-items-center p-3 rounded-3 text-decoration-none transition-colors"
+       style="background-color: rgba(255,255,255,0.8); backdrop-filter: blur(4px);">
+        <img src="{{ ad.author.avatar }}" alt="{{ ad.author.fullName }}"
+             class="rounded-circle object-fit-cover flex-shrink-0 border"
+             style="width: 2.5rem; height: 2.5rem;">
+        <div class="flex-fill min-width-0 overflow-hidden">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+                <p class="small fw-medium text-main text-truncate mb-0">{{ ad.author.fullName }}</p>
+                <span class="badge {{ statusClass }} small flex-shrink-0">{{ statusLabel }}</span>
+            </div>
+            <p class="small text-muted text-truncate mb-0 mt-1">{{ ad.title }}</p>
+            <p class="small text-muted mb-0 mt-1 d-flex align-items-center gap-1">
+                <i class="fa-regular fa-calendar" style="font-size: 0.65rem;"></i>
+                {{ booking.startDate|date('M d') }} — {{ booking.endDate|date('M d') }}
+            </p>
+        </div>
+    </a>
+{% endmacro %}
+
+
+{% macro nav_item(href, icon, label, active) %}
+    <a href="{{ href }}" class="sidebar-nav-link {{ active ? 'active' : '' }}">
+        <i class="{{ icon }} nav-icon text-center" style="width: 1.25rem;"></i>
+        {{ label }}
+    </a>
+{% endmacro %}

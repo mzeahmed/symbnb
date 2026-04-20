@@ -1,64 +1,53 @@
-<footer id="footer" class="bg-gray-100 border-t border-gray-200 py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-            <!-- Support Column -->
+<footer id="footer" class="bg-light border-top py-5 mt-auto">
+    <div class="container-xl px-4">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-5 mb-5">
             <div id="footer-col-1">
-                <h4 class="font-semibold text-gray-900 mb-4">Support</h4>
-                <ul class="space-y-2">
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Help Center</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Safety Information</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Cancellation Options</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Contact Us</a></li>
+                <h6 class="fw-semibold text-dark mb-3">Support</h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><a href="#" class="text-muted text-decoration-none transition-colors">Help Center</a></li>
+                    <li class="mb-2"><a href="#" class="text-muted text-decoration-none transition-colors">Safety Information</a></li>
+                    <li class="mb-2"><a href="#" class="text-muted text-decoration-none transition-colors">Cancellation Options</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none transition-colors">Contact Us</a></li>
                 </ul>
             </div>
 
-            <!-- Community Column -->
             <div id="footer-col-2">
-                <h4 class="font-semibold text-gray-900 mb-4">Community</h4>
-                <ul class="space-y-2">
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Blog</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Forum</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Referrals</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Gift Cards</a></li>
+                <h6 class="fw-semibold text-dark mb-3">Community</h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Blog</a></li>
+                    <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Forum</a></li>
+                    <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Referrals</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none">Gift Cards</a></li>
                 </ul>
             </div>
 
-            <!-- Hosting Column -->
             <div id="footer-col-3">
-                <h4 class="font-semibold text-gray-900 mb-4">Hosting</h4>
-                <ul class="space-y-2">
-                    <li><a href="{{ path('ads_create') }}" class="text-gray-600 hover:text-coral transition">Become a Host</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Host Resources</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Community Forum</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Responsible Hosting</a></li>
+                <h6 class="fw-semibold text-dark mb-3">Hosting</h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><a href="{{ path('ads_create') }}" class="text-muted text-decoration-none">Become a Host</a></li>
+                    <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Host Resources</a></li>
+                    <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Community Forum</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none">Responsible Hosting</a></li>
                 </ul>
             </div>
 
-            <!-- About Column -->
             <div id="footer-col-4">
-                <h4 class="font-semibold text-gray-900 mb-4">About</h4>
-                <ul class="space-y-2">
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">About Us</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Careers</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Press</a></li>
-                    <li><a href="#" class="text-gray-600 hover:text-coral transition">Investors</a></li>
+                <h6 class="fw-semibold text-dark mb-3">About</h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><a href="#" class="text-muted text-decoration-none">About Us</a></li>
+                    <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Careers</a></li>
+                    <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Press</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none">Investors</a></li>
                 </ul>
             </div>
         </div>
 
-        <!-- Footer Bottom -->
-        <div class="border-t border-gray-300 pt-8 flex flex-col sm:flex-row justify-between items-center">
-            <p class="text-gray-600 text-sm mb-4 sm:mb-0">© {{ "now"|date("Y") }} SymBnb. All rights reserved.</p>
-            <div class="flex items-center space-x-6">
-                <a href="#" class="text-gray-600 hover:text-coral transition">
-                    <i class="fa-brands fa-facebook text-xl"></i>
-                </a>
-                <a href="#" class="text-gray-600 hover:text-coral transition">
-                    <i class="fa-brands fa-twitter text-xl"></i>
-                </a>
-                <a href="#" class="text-gray-600 hover:text-coral transition">
-                    <i class="fa-brands fa-instagram text-xl"></i>
-                </a>
+        <div class="border-top pt-4 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+            <p class="text-muted small mb-0">© {{ "now"|date("Y") }} SymBnb. All rights reserved.</p>
+            <div class="d-flex gap-4">
+                <a href="#" class="text-muted fs-5"><i class="fa-brands fa-facebook"></i></a>
+                <a href="#" class="text-muted fs-5"><i class="fa-brands fa-twitter"></i></a>
+                <a href="#" class="text-muted fs-5"><i class="fa-brands fa-instagram"></i></a>
             </div>
         </div>
     </div>
