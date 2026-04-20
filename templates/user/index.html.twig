@@ -1,47 +1,257 @@
 {% extends 'base.html.twig' %}
+{% from 'macros/ui.html.twig' import stat_card, ad_card, booking_item, nav_item %}
 
-{% block title %}Page de {{ user.fullName }}{% endblock %}
+{% block title %}{{ user.fullName }} — Profile{% endblock %}
+
+{% block show_footer %}false{% endblock %}
+{% block body_class %}{% endblock %}
+{% block main_class %}d-flex overflow-hidden{% endblock %}
+
+{% set adsWithRating = 0 %}
+{% set sumRatings    = 0 %}
+{% set totalReviews  = 0 %}
+{% set upcomingCount = 0 %}
+{% for a in user.ads %}
+    {% set totalReviews = totalReviews + a.comments|length %}
+    {% if a.comments|length > 0 %}
+        {% set adsWithRating = adsWithRating + 1 %}
+        {% set sumRatings    = sumRatings + a.avgRatings %}
+    {% endif %}
+{% endfor %}
+{% for b in user.bookings %}
+    {% if date() < date(b.startDate) %}
+        {% set upcomingCount = upcomingCount + 1 %}
+    {% endif %}
+{% endfor %}
+{% set avgRating = adsWithRating > 0 ? (sumRatings / adsWithRating)|number_format(1) : null %}
 
 {% block body %}
-    <div class="container">
-        <div class="row align-items-center mb-5">
-            <div class="col-3 text-center">
-                <img src="{{ user.picture }}" class="avatar mb-3" alt="Avatar de {{ user.fullName }}">
-                <br>
-                <span class="badge badge-primary">{{ user.ads | length }} annonces</span>
+<div class="d-flex w-100 overflow-hidden" style="height: calc(100vh - 64px);">
+
+    {# ── Sidebar ── #}
+    <aside class="bg-white border-end d-none d-md-flex flex-column justify-content-between flex-shrink-0 overflow-y-auto"
+           style="width: 256px; height: calc(100vh - 64px);">
+        <div>
+            <div class="d-flex align-items-center gap-2 px-4 border-bottom fw-bold fs-5 text-main" style="height: 4rem;">
+                <i class="fa-solid fa-house-chimney text-primary"></i>
+                <span>SymBnb</span>
             </div>
-            <div class="col-9">
-                <h1>{{ user.fullName }}</h1>
+
+            <div class="p-3">
+                <div class="mb-4">
+                    <p class="text-uppercase fw-semibold text-muted px-3 mb-2" style="font-size: 0.7rem; letter-spacing: 0.08em;">Main Menu</p>
+                    <nav class="d-flex flex-column gap-1">
+                        {{ nav_item(path('user_show', {'slug': user.slug}), 'fa-solid fa-border-all', 'Overview', true) }}
+                        {{ nav_item('#ads', 'fa-solid fa-building', 'My Ads', false) }}
+                        {{ nav_item(path('app_user_bookings'), 'fa-solid fa-calendar-check', 'Bookings', false) }}
+                    </nav>
+                </div>
+
                 {% if user is same as(app.user) %}
-                    <div class="mt-3">
-                        <a href="{{ path('account_profile') }}" class="btn btn-primary mr-2 mb-2">Modifier mes
-                            informations</a>
-                        <a href="{{ path('account_password') }}" class="btn btn-primary mb-2">Modifier mon mot de
-                            passe</a>
+                    <div>
+                        <p class="text-uppercase fw-semibold text-muted px-3 mb-2" style="font-size: 0.7rem; letter-spacing: 0.08em;">Account</p>
+                        <nav class="d-flex flex-column gap-1">
+                            {{ nav_item(path('app_user_settings'), 'fa-solid fa-user', 'Profile Settings', false) }}
+                            {{ nav_item(path('app_password_update'), 'fa-solid fa-lock', 'Password', false) }}
+                        </nav>
                     </div>
                 {% endif %}
             </div>
         </div>
 
-        {{ user.description | raw }}
-
-        <hr>
-
-        <h1>Les annones de {{ user.fullName }}</h1>
-
-        {% if user.ads | length > 0 %}
-            <div class="row">
-                {% for ad in user.ads %}
-                    {% include 'ad/_ad.html.twig' %}
-                {% endfor %}
+        <div class="p-3 border-top">
+            <div class="d-flex align-items-center gap-3 px-3 py-2 rounded-3 cursor-pointer">
+                <img src="{{ user.avatar }}" alt="{{ user.fullName }}"
+                     class="rounded-circle object-fit-cover border flex-shrink-0"
+                     style="width: 2.5rem; height: 2.5rem;">
+                <div class="flex-fill overflow-hidden">
+                    <p class="small fw-semibold text-main text-truncate mb-0">{{ user.fullName }}</p>
+                    <p class="small text-muted mb-0">Host</p>
+                </div>
+                <i class="fa-solid fa-chevron-up small text-muted"></i>
             </div>
-        {% else %}
-            <div class="alert alert-warning">
-                <p>
-                    <strong>{{ user.fullName }} n'a pas encore d'annonces sur le site !</strong>
-                </p>
-            </div>
-        {% endif %}
+        </div>
+    </aside>
 
-    </div>
+    {# ── Main Content ── #}
+    <main class="flex-fill d-flex flex-column bg-background overflow-hidden position-relative"
+          style="height: calc(100vh - 64px);">
+
+        {# Top bar #}
+        <header class="bg-white border-bottom d-flex align-items-center justify-content-between px-4 px-lg-5 flex-shrink-0" style="height: 4rem; z-index: 10;">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-light btn-sm d-md-none">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1 class="fs-5 fw-semibold text-main mb-0">Dashboard Overview</h1>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="position-relative d-none d-sm-block">
+                    <i class="fa-solid fa-search position-absolute text-muted small" style="left: 0.75rem; top: 50%; transform: translateY(-50%); pointer-events: none;"></i>
+                    <label for="dashboard-search" class="visually-hidden">Search bookings, ads</label>
+                    <input id="dashboard-search" type="search" placeholder="Search bookings, ads…"
+                           class="form-control form-control-sm ps-5 bg-light border"
+                           style="width: 16rem;">
+                </div>
+
+                <button class="btn btn-light btn-sm rounded-circle p-2 position-relative" aria-label="Notifications">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="position-absolute top-0 end-0 translate-middle p-1 bg-danger border border-white rounded-circle" style="width: 0.6rem; height: 0.6rem;"></span>
+                </button>
+
+                {% if user is same as(app.user) %}
+                    <a href="{{ path('ads_create') }}"
+                       class="btn btn-primary btn-sm d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="d-none d-sm-inline">New Ad</span>
+                    </a>
+                {% endif %}
+            </div>
+        </header>
+
+        {# Scrollable area #}
+        <div class="flex-fill overflow-y-auto p-4 p-lg-5">
+            <div class="mx-auto" style="max-width: 1200px;">
+
+                {# ── Profile Header ── #}
+                <section class="card border shadow-card mb-5">
+                    <div class="card-body p-4 p-md-5 d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-4">
+                        <div class="d-flex align-items-center gap-4">
+                            <div class="position-relative">
+                                <img src="{{ user.avatar }}" alt="{{ user.fullName }}"
+                                     class="rounded-circle object-fit-cover border border-4 border-white shadow-soft"
+                                     style="width: 5rem; height: 5rem;">
+                                <div class="position-absolute bottom-0 end-0 bg-success rounded-circle border border-2 border-white d-flex align-items-center justify-content-center"
+                                     style="width: 1.5rem; height: 1.5rem;" title="Verified Host">
+                                    <i class="fa-solid fa-check text-white" style="font-size: 0.6rem;"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h2 class="fs-4 fw-bold text-main d-flex align-items-center gap-2 flex-wrap mb-1">
+                                    {{ user.fullName }}
+                                    <span class="badge badge-primary-soft border fw-semibold" style="font-size: 0.7rem;">Host</span>
+                                </h2>
+                                <p class="text-muted small d-flex align-items-center gap-1 mb-0">
+                                    <i class="fa-solid fa-calendar-days" style="font-size: 0.7rem;"></i>
+                                    Joined {{ user.createdAt|date('Y') }}
+                                </p>
+                                {% if user is same as(app.user) %}
+                                    <div class="d-flex flex-wrap gap-2 mt-3">
+                                        <a href="{{ path('app_user_settings') }}"
+                                           class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit Profile
+                                        </a>
+                                        <a href="{{ path('app_password_update') }}"
+                                           class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+                                            <i class="fa-solid fa-lock"></i> Password
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-5 border-top border-md-top-0 border-md-start pt-4 pt-md-0 ps-md-5 w-100 w-md-auto flex-shrink-0">
+                            <div class="text-center">
+                                <p class="fs-4 fw-bold text-main mb-0">{{ user.ads|length }}</p>
+                                <p class="small text-muted text-uppercase fw-medium mb-0" style="font-size: 0.7rem; letter-spacing: 0.05em;">Ads</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="fs-4 fw-bold text-main mb-0">{{ user.bookings|length }}</p>
+                                <p class="small text-muted text-uppercase fw-medium mb-0" style="font-size: 0.7rem; letter-spacing: 0.05em;">Bookings</p>
+                            </div>
+                            <div class="text-center">
+                                {% if avgRating %}
+                                    <p class="fs-4 fw-bold text-main d-flex align-items-center justify-content-center gap-1 mb-0">
+                                        {{ avgRating }} <i class="fa-solid fa-star text-warning small"></i>
+                                    </p>
+                                {% else %}
+                                    <p class="fs-4 fw-bold text-muted mb-0">—</p>
+                                {% endif %}
+                                <p class="small text-muted text-uppercase fw-medium mb-0" style="font-size: 0.7rem; letter-spacing: 0.05em;">Rating</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {# ── KPI Cards ── #}
+                <section class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-5">
+                    {{ stat_card('fa-solid fa-calendar-check',    'blue',   'Total Bookings',    user.bookings|length, '12%',       true)  }}
+                    {{ stat_card('fa-solid fa-clock-rotate-left', 'purple', 'Upcoming Bookings', upcomingCount,        'This month', false) }}
+                    {{ stat_card('fa-solid fa-building',          'green',  'Active Ads',   user.ads|length,      'Active',     true)  }}
+                    {{ stat_card('fa-solid fa-comment-dots',      'orange', 'Reviews Received',  totalReviews,         'All time',   false) }}
+                </section>
+
+                {# ── Ads + Bookings ── #}
+                <div class="row g-4">
+
+                    <div id="ads" class="col-12 col-xl-8">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <h2 class="fs-5 fw-semibold text-main mb-0">
+                                Active Ads ({{ user.ads|length }})
+                            </h2>
+                            {% if user is same as(app.user) %}
+                                <a href="{{ path('ads_create') }}" class="small fw-medium text-primary text-decoration-none">View all</a>
+                            {% endif %}
+                        </div>
+
+                        {% if user.ads|length > 0 %}
+                            <div class="row row-cols-1 row-cols-md-2 g-4">
+                                {% for ad in user.ads %}
+                                    <div class="col">
+                                        {{ ad_card(ad, user is same as(app.user)) }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="card border shadow-card text-center p-5">
+                                <i class="fa-solid fa-house-circle-xmark text-secondary fs-1 mb-3"></i>
+                                <p class="text-muted fw-medium mb-0">No ads yet</p>
+                                {% if user is same as(app.user) %}
+                                    <a href="{{ path('ads_create') }}"
+                                       class="btn btn-primary d-inline-flex align-items-center gap-2 mt-4 mx-auto">
+                                        <i class="fa-solid fa-plus"></i> Create my first ad
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-12 col-xl-4">
+                        <div class="card border shadow-card d-flex flex-column h-100">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 px-4">
+                                <h2 class="fs-5 fw-semibold text-main mb-0">Recent Bookings</h2>
+                                <button class="btn btn-light btn-sm p-1" aria-label="More options">
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </button>
+                            </div>
+
+                            <div class="p-2 flex-fill overflow-y-auto">
+                                {% if user is same as(app.user) and app.user.bookings|length > 0 %}
+                                    {% for booking in app.user.bookings|slice(0, 5) %}
+                                        {{ booking_item(booking) }}
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="p-4 text-center small text-muted">
+                                        {% if user is same as(app.user) %}No bookings yet.{% else %}Private information.{% endif %}
+                                    </p>
+                                {% endif %}
+                            </div>
+
+                            {% if user is same as(app.user) %}
+                                <div class="card-footer bg-white p-3">
+                                    <a href="{{ path('app_user_bookings') }}"
+                                       class="btn btn-outline-secondary btn-sm w-100 text-center">
+                                        View All Bookings
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
 {% endblock %}

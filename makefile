@@ -42,6 +42,9 @@ cache-clear: ## Clear the cache
 test: ## Run tests
 	$(PHP) bin/phpunit
 
+test_e2e: ## Run end-to-end tests
+	npm run test:e2e:ui
+
 fixtures: ## Load fixtures
 	$(PHP) bin/console doctrine:fixtures:load --no-interaction
 

@@ -6,22 +6,22 @@
     "@fortawesome/fontawesome-free": "^7.2.0",
     "@hotwired/stimulus": "^3.0.0",
     "@hotwired/turbo": "^7.1.1 || ^8.0",
+    "@playwright/test": "^1.59.1",
     "@symfony/stimulus-bridge": "^3.2.0 || ^4.0.0",
     "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets",
     "@symfony/webpack-encore": "^5.0.0",
-    "@tailwindcss/cli": "^4.1.11",
-    "@tailwindcss/postcss": "^4.2.2",
-    "@tailwindplus/elements": "^1.0.2",
+    "@types/bootstrap": "^5.2.10",
+    "@types/node": "^25.6.0",
     "autoprefixer": "^10.4.21",
+    "bootstrap": "^5.3.3",
     "core-js": "^3.38.0",
-    "notyf": "^3.10.0",
     "file-loader": "^6.2.0",
+    "notyf": "^3.10.0",
     "postcss": "^8.5.10",
     "postcss-loader": "^8.2.1",
     "regenerator-runtime": "^0.13.9",
     "sass": "^1.89.2",
     "sass-loader": "^16.0.5",
-    "tailwindcss": "^4.2.2",
     "ts-loader": "^9.5.1",
     "typescript": "~5.4.0",
     "webpack": "^5.74.0",
@@ -34,6 +34,11 @@
     "dev-server": "encore dev-server",
     "dev": "encore dev",
     "watch": "encore dev --watch",
-    "build": "encore production --progress"
+    "build": "encore production --progress",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "dependencies": {
+    "flatpickr": "^4.6.13"
   }
 }

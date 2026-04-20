@@ -1,3 +1,3 @@
 import './styles/app.scss';
-import '@tailwindplus/elements';
+import 'bootstrap';
 import 'notyf/notyf.min.css';

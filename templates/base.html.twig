@@ -32,12 +32,15 @@
     {% set isRegisterPage = currentRoute in ['account_register', 'app_register'] %}
     {% set pageBody %}{% block body %}{% endblock %}{% endset %}
 
-    <body class="font-sans bg-white text-gray-900 {{ (isLoginPage or isRegisterPage) ? 'h-screen overflow-hidden' : '' }}">
-        <div class="fixed top-4 left-1/2 z-[100] w-full max-w-2xl -translate-x-1/2 px-4 sm:px-6 lg:px-8 pointer-events-none">
+    <body class="{% block body_class %}{% endblock %} {{ (isLoginPage or isRegisterPage) ? 'overflow-hidden' : '' }}">
+
+        {# ── Flash messages ── #}
+        <div class="position-fixed top-0 start-50 translate-middle-x mt-3 px-3" style="z-index: 1090; width: 100%; max-width: 600px; pointer-events: none;">
             {% for label, messages in app.flashes %}
-                <div class="mb-3 pointer-events-auto rounded-lg border px-4 py-3 shadow-lg bg-{{ label == 'success' ? 'green' : label == 'error' ? 'red' : 'blue' }}-50 border-{{ label == 'success' ? 'green' : label == 'error' ? 'red' : 'blue' }}-200">
+                {% set alertClass = label == 'success' ? 'alert-success' : (label == 'error' ? 'alert-danger' : 'alert-info') %}
+                <div class="alert {{ alertClass }} shadow pointer-events-auto mb-2" role="alert">
                     {% for message in messages %}
-                        <p class="text-{{ label == 'success' ? 'green' : label == 'error' ? 'red' : 'blue' }}-800">{{ message | raw }}</p>
+                        <p class="mb-0">{{ message | raw }}</p>
                     {% endfor %}
                 </div>
             {% endfor %}
@@ -54,13 +57,13 @@
         {% if isLoginPage or isRegisterPage %}
             {{ pageBody }}
         {% else %}
-            <main id="main-content">
+            <main id="main-content" class="{% block main_class %}{% endblock %}">
                 {{ pageBody }}
             </main>
         {% endif %}
 
-
-        {% if not isLoginPage and not isRegisterPage %}
+        {% block show_footer %}{% endblock %}
+        {% if not isLoginPage and not isRegisterPage and block('show_footer') != 'false' %}
             {% include 'partials/_footer.html.twig' %}
         {% endif %}
     </body>

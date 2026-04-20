@@ -1,27 +1,29 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edition d'une annonce{% endblock %}
+{% block title %}Edit ad{% endblock %}
 
 {% form_theme form 'ad/_collection.html.twig' %}
 
 {% block body %}
-    <div class="container">
-        <h1>Modifier l'annonce : {{ ad.title }}</h1>
+    <div class="container py-5" style="max-width: 800px;">
+        <h1 class="fw-bold text-dark mb-5">Edit ad: {{ ad.title }}</h1>
 
-        {{ form_start(form) }}
+        <div class="card border shadow-soft">
+            <div class="card-body p-4">
+                {{ form_start(form) }}
+                {{ form_widget(form) }}
 
-        {{ form_widget(form) }}
+                <button type="submit" class="btn btn-coral d-inline-flex align-items-center gap-2 mt-3">
+                    <i class="fas fa-check"></i>
+                    Save changes
+                </button>
 
-        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
-
-        {{ form_end(form) }}
+                {{ form_end(form) }}
+            </div>
+        </div>
     </div>
 {% endblock %}
 
 {% block javascripts %}
-
-    <script src="{{ asset('build/ad.js') }}"></script>
-    {#gestion du probleme de chargement des packages via webpack#}
     {{ encore_entry_script_tags('ad') }}
-
 {% endblock %}

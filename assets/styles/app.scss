@@ -1,22 +1,343 @@
 @use 'loader';
 
-@import "tailwindcss";
+// ── Bootstrap variable overrides ──────────────────────────────────────────────
+$primary: #2563EB;
+$success: #10B981;
+$warning: #EAB308;
+$danger: #EF4444;
+$body-color: #111827;
+$body-bg: #F3F4F6;
+$font-family-sans-serif: 'Inter', sans-serif;
+$border-radius: 0.5rem;
+$border-radius-lg: 0.75rem;
+$border-radius-xl: 1rem;
+$card-border-color: #E5E7EB;
+$card-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+$input-focus-border-color: $primary;
 
-@source not "../../public";
+@import "bootstrap/scss/bootstrap";
 
-@theme {
-  --loader-accent-color: #0d6efd;
-  --color-coral: #FF5A5F;
-  --color-coral-dark: #E0484D;
-  --font-sans: 'Inter', sans-serif;
-}
-
+// ── Scrollbar ─────────────────────────────────────────────────────────────────
 ::-webkit-scrollbar {
   display: none;
 }
 
-body {
-  .d-none {
-    display: none !important;
+body .d-none {
+  display: none !important;
+}
+
+// ── Brand colors ──────────────────────────────────────────────────────────────
+$coral: #FF5A5F;
+$coral-dark: #E0484D;
+
+.text-coral {
+  color: $coral !important;
+}
+
+.bg-coral {
+  background-color: $coral !important;
+}
+
+.border-coral {
+  border-color: $coral !important;
+}
+
+.btn-coral {
+  background-color: $coral;
+  border-color: $coral;
+  color: #fff;
+
+  &:hover, &:focus, &:active {
+    background-color: $coral-dark;
+    border-color: $coral-dark;
+    color: #fff;
+  }
+}
+
+// ── Custom text helpers ───────────────────────────────────────────────────────
+.text-main {
+  color: #111827 !important;
+}
+
+.text-muted-sm {
+  color: #6B7280 !important;
+  font-size: 0.875rem;
+}
+
+.bg-background {
+  background-color: #F3F4F6 !important;
+}
+
+.bg-surface {
+  background-color: #ffffff !important;
+}
+
+// ── Shadows ───────────────────────────────────────────────────────────────────
+.shadow-soft {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
+}
+
+.shadow-card {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+}
+
+// ── Card hover ────────────────────────────────────────────────────────────────
+.card-hover {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    transform: scale(1.02);
+  }
+}
+
+// ── Image utilities ───────────────────────────────────────────────────────────
+.object-fit-cover {
+  object-fit: cover;
+}
+
+.h-40 {
+  height: 10rem !important;
+}
+
+.h-48 {
+  height: 12rem !important;
+}
+
+.h-64 {
+  height: 16rem !important;
+}
+
+.h-72 {
+  height: 18rem !important;
+}
+
+// ── Avatar sizes ──────────────────────────────────────────────────────────────
+.avatar-sm {
+  width: 2rem;
+  height: 2rem;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatar-md {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatar-lg {
+  width: 5rem;
+  height: 5rem;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+// ── Auth layouts ───────────────────────────────────────────────────────────────
+.login-left-panel {
+  display: none;
+}
+
+.login-right-panel {
+  width: 100%;
+}
+
+@media (min-width: 992px) {
+  .login-left-panel {
+    display: flex !important;
+    width: 50%;
+  }
+
+  .login-right-panel {
+    width: 50%;
+  }
+}
+
+.register-left-panel {
+  display: none;
+}
+
+.register-right-panel {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .register-left-panel {
+    display: flex !important;
+  }
+}
+
+// ── Line clamp ────────────────────────────────────────────────────────────────
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6B7280;
+  text-decoration: none;
+  transition: background-color 0.15s, color 0.15s;
+
+  &:hover {
+    background-color: #F9FAFB;
+    color: #111827;
+  }
+
+  &.active {
+    background-color: #F3F4F6;
+    color: #111827;
+
+    .nav-icon {
+      color: $primary;
+    }
+  }
+}
+
+// ── Carousel dots ─────────────────────────────────────────────────────────────
+.carousel-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: #D1D5DB;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &.active {
+    background-color: $coral;
+  }
+}
+
+// ── Header dropdown on hover ──────────────────────────────────────────────────
+.dropdown-hover:hover > .dropdown-menu {
+  display: block;
+}
+
+// ── Gradient overlay for images ────────────────────────────────────────────────
+.img-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
+  pointer-events: none;
+}
+
+// ── Transition helpers ────────────────────────────────────────────────────────
+.transition-colors {
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+// ── Stat card icon themes ────────────────────────────────────────────────────
+.icon-theme-blue {
+  background-color: #EFF6FF;
+  color: #2563EB;
+}
+
+.icon-theme-purple {
+  background-color: #F5F3FF;
+  color: #7C3AED;
+}
+
+.icon-theme-green {
+  background-color: #ECFDF5;
+  color: #059669;
+}
+
+.icon-theme-orange {
+  background-color: #FFF7ED;
+  color: #EA580C;
+}
+
+.card-hover:hover {
+  .icon-theme-blue {
+    background-color: #2563EB;
+    color: #fff;
+  }
+
+  .icon-theme-purple {
+    background-color: #7C3AED;
+    color: #fff;
+  }
+
+  .icon-theme-green {
+    background-color: #059669;
+    color: #fff;
+  }
+
+  .icon-theme-orange {
+    background-color: #EA580C;
+    color: #fff;
+  }
+}
+
+// ── Badge variants ────────────────────────────────────────────────────────────
+.badge-success-soft {
+  background-color: #ECFDF5;
+  color: #059669;
+}
+
+.badge-muted-soft {
+  background-color: #F3F4F6;
+  color: #6B7280;
+}
+
+.badge-primary-soft {
+  background-color: #EFF6FF;
+  color: #2563EB;
+}
+
+// ── Rating stars ─────────────────────────────────────────────────────────────
+.rating .fa-star {
+  color: $warning;
+}
+
+.rating .far.fa-star {
+  color: #D1D5DB;
+}
+
+// ── Page loader ───────────────────────────────────────────────────────────────
+.ad-title {
+  background-size: cover;
+  background-position: center;
+  padding: 4rem 0;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  h1 {
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.9);
   }
 }

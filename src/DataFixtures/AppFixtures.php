@@ -7,48 +7,43 @@ namespace App\DataFixtures;
 use App\Entity\Ad;
 use Faker\Factory;
 use App\Entity\User;
-use Faker\Generator;
 use App\Entity\Image;
 use App\Entity\Amenity;
 use App\Entity\Booking;
 use App\Entity\Comment;
 use App\Entity\Category;
 use App\Entity\Favorite;
-use Cocur\Slugify\Slugify;
 use App\Booking\Enum\BookingStatus;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 
-class AppFixtures extends Fixture
+class AppFixtures extends Fixture implements DependentFixtureInterface
 {
-    public function __construct(
-        private readonly UserPasswordHasherInterface $hasher
-    ) {
-    }
-
     public function load(ObjectManager $manager): void
     {
-        $faker = Factory::create('FR');
-        $slugify = new Slugify();
+        $faker = Factory::create('fr_FR');
+        $users = $this->getUsers();
 
-        // ── Admin user ────────────────────────────────────────────────────────
-        $adminUser = new User();
-        $adminUser
-            ->setFirstName('Admin')
-            ->setLastName('User')
-            ->setEmail('adminuser@symbnb.net')
-            ->setSlug('admin-user')
-            ->setPassword($this->hasher->hashPassword($adminUser, 'password'))
-            ->setAvatar($this->getGravatar('adminuser@symbnb.net'))
-            ->setBio(implode("\n\n", $faker->paragraphs(3)))
-            ->setRoles(['ROLE_ADMIN'])
-            ->setIsHost(true)
-            ->setIsVerified(true)
-            ->setPhone('+33 6 00 00 00 00');
-        $manager->persist($adminUser);
+        $categories = $this->createCategories($manager);
+        $amenities = $this->createAmenities($manager);
+        $ads = $this->createAds($manager, $faker, $users, $categories, $amenities);
+        $this->createBookingsAndReviews($manager, $faker, $users, $ads);
+        $this->createFavorites($manager, $faker, array_slice($users, 1), $ads);
 
-        // ── Categories ────────────────────────────────────────────────────────
+        $manager->flush();
+    }
+
+    public function getDependencies(): array
+    {
+        return [UserFixtures::class];
+    }
+
+    /**
+     * @return list<Category>
+     */
+    private function createCategories(ObjectManager $manager): array
+    {
         $categoryData = [
             ['Apartment', 'fa-building', 'Urban flats and city apartments'],
             ['House', 'fa-home', 'Entire houses for comfortable stays'],
@@ -66,7 +61,14 @@ class AppFixtures extends Fixture
             $categories[] = $category;
         }
 
-        // ── Amenities ─────────────────────────────────────────────────────────
+        return $categories;
+    }
+
+    /**
+     * @return list<Amenity>
+     */
+    private function createAmenities(ObjectManager $manager): array
+    {
         $amenityData = [
             // [name, icon, group]
             ['WiFi', 'wifi', 'Essentials'],
@@ -96,42 +98,18 @@ class AppFixtures extends Fixture
             $amenities[] = $amenity;
         }
 
-        // ── Regular users ─────────────────────────────────────────────────────
-        $users = [];
-        $genders = ['male', 'female'];
+        return $amenities;
+    }
 
-        for ($i = 0; $i < 10; $i++) {
-            $user = new User();
-            $gender = $faker->randomElement($genders);
-            $num = $faker->numberBetween(1, 99);
-            $firstName = $faker->firstName($gender);
-            $lastName = $faker->lastName();
-            $email = $faker->unique()->safeEmail();
-            $picture = sprintf(
-                'https://randomuser.me/api/portraits/%s/%d.jpg',
-                $gender === 'male' ? 'men' : 'women',
-                $num
-            );
-
-            $user
-                ->setFirstName($firstName)
-                ->setLastName($lastName)
-                ->setEmail($email)
-                ->setSlug($slugify->slugify(sprintf('%s %s %d', $firstName, $lastName, $i + 1)))
-                ->setPassword($this->hasher->hashPassword($user, 'password'))
-                ->setAvatar($picture)
-                ->setBio(implode("\n\n", $faker->paragraphs(3)))
-                ->setPhone($faker->optional(0.6)->passthrough($this->generatePhoneNumber($faker)))
-                ->setIsHost($faker->boolean(40))
-                ->setIsVerified($faker->boolean(80));
-
-            $manager->persist($user);
-            $users[] = $user;
-        }
-
-        $allUsers = array_merge([$adminUser], $users);
-
-        // ── Listings (Ads) ────────────────────────────────────────────────────
+    /**
+     * @param list<User> $users
+     * @param list<Category> $categories
+     * @param list<Amenity> $amenities
+     *
+     * @return list<Ad>
+     */
+    private function createAds(ObjectManager $manager, \Faker\Generator $faker, array $users, array $categories, array $amenities): array
+    {
         $cities = [
             'Paris',
             'Lyon',
@@ -149,7 +127,7 @@ class AppFixtures extends Fixture
         $ads = [];
         for ($i = 0; $i < 30; $i++) {
             $ad = new Ad();
-            $author = $faker->randomElement($allUsers);
+            $author = $faker->randomElement($users);
             $city = $faker->randomElement($cities);
 
             $ad
@@ -192,7 +170,15 @@ class AppFixtures extends Fixture
             $ads[] = $ad;
         }
 
-        // ── Bookings + Reviews ────────────────────────────────────────────────
+        return $ads;
+    }
+
+    /**
+     * @param list<User> $users
+     * @param list<Ad> $ads
+     */
+    private function createBookingsAndReviews(ObjectManager $manager, \Faker\Generator $faker, array $users, array $ads): void
+    {
         $statuses = [
             BookingStatus::Confirmed,
             BookingStatus::Confirmed,
@@ -206,7 +192,16 @@ class AppFixtures extends Fixture
             $bookingCount = $faker->numberBetween(0, 8);
 
             for ($j = 0; $j < $bookingCount; $j++) {
-                $booker = $faker->randomElement($allUsers);
+                $eligibleBookers = array_values(array_filter(
+                    $users,
+                    static fn(User $user): bool => $user !== $ad->getAuthor()
+                ));
+
+                if ($eligibleBookers === []) {
+                    continue;
+                }
+
+                $booker = $faker->randomElement($eligibleBookers);
                 $status = $faker->randomElement($statuses);
                 $duration = $faker->numberBetween(2, 14);
                 $startDate = $faker->dateTimeBetween('-4 months', '+2 months');
@@ -244,11 +239,21 @@ class AppFixtures extends Fixture
                 }
             }
         }
+    }
 
-        // ── Favorites ─────────────────────────────────────────────────────────
+    /**
+     * @param list<User> $users
+     * @param list<Ad> $ads
+     */
+    private function createFavorites(ObjectManager $manager, \Faker\Generator $faker, array $users, array $ads): void
+    {
         foreach ($users as $user) {
             $favoriteCount = $faker->numberBetween(0, 5);
-            $shuffledAds = $ads;
+            $shuffledAds = array_values(array_filter(
+                $ads,
+                static fn(Ad $ad): bool => $ad->getAuthor() !== $user
+            ));
+
             shuffle($shuffledAds);
 
             foreach (array_slice($shuffledAds, 0, $favoriteCount) as $ad) {
@@ -257,26 +262,19 @@ class AppFixtures extends Fixture
                 $manager->persist($favorite);
             }
         }
-
-        $manager->flush();
     }
 
     /**
-     * Returns a Gravatar URL for the given email address.
+     * @return list<User>
      */
-    private function getGravatar(string $email): string
+    private function getUsers(): array
     {
-        return 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($email))) . '?s=80&d=mp&r=g';
-    }
+        $users = [$this->getReference(UserFixtures::ADMIN_REFERENCE, User::class)];
 
-    private function generatePhoneNumber(Generator $faker): string
-    {
-        return sprintf(
-            '+33 6 %02d %02d %02d %02d',
-            $faker->numberBetween(10, 99),
-            $faker->numberBetween(10, 99),
-            $faker->numberBetween(10, 99),
-            $faker->numberBetween(10, 99),
-        );
+        for ($i = 0; $i < UserFixtures::REGULAR_USERS_COUNT; $i++) {
+            $users[] = $this->getReference(UserFixtures::USER_REFERENCE_PREFIX . $i, User::class);
+        }
+
+        return $users;
     }
 }

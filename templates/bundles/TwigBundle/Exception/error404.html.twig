@@ -1,16 +1,17 @@
-{% extends'base.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block title %}Page non trouvée{% endblock %}
+{% block title %}Page not found{% endblock %}
 
 {% block body %}
-
-    <div class="container">
-        <h1>Oups ! La page que vous recherchez n'existe pas !</h1>
-        <p>On a suremeent dû mal vous renseigner ! Aucun soucis, vous pouvez retourner ' l'accueil ou voir nos dernieres
-            annonces !</p>
-
-        <a href="{{ path('homepage') }}" class="btn btn-primary">Retour à l'accueil</a>
-        <a href="{{ path('ads_index') }}" class="btn btn-success">Nos annonces</a>
+    <div class="container py-5 text-center" style="max-width: 640px;">
+        <h1 class="display-1 fw-bold text-muted">404</h1>
+        <h2 class="fw-bold text-dark mb-3">Page not found!</h2>
+        <p class="text-muted mb-5">
+            We must have given you wrong directions! No worries, you can go back to the home page or browse our latest ads.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ path('app_home') }}" class="btn btn-primary">Back to home</a>
+            <a href="{{ path('ads_index') }}" class="btn btn-outline-secondary">Our ads</a>
+        </div>
     </div>
-
 {% endblock %}

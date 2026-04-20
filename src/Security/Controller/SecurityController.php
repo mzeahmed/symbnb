@@ -6,19 +6,24 @@ namespace App\Security\Controller;
 
 use App\Entity\User;
 use App\Security\RegisterUser;
+use App\Entity\PasswordUpdate;
+use App\Security\PasswordUpdater;
 use App\Repository\UserRepository;
 use App\User\Form\RegistrationType;
+use App\User\Form\PasswordUpdateType;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Shared\Http\Response\ApiResponseInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
     #[Route(path: '/login', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    public function login(AuthenticationUtils $authenticationUtils, UserRepository $repository): Response
     {
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -26,9 +31,15 @@ class SecurityController extends AbstractController
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
+        /**
+         * @todo : improve to get random user review
+         */
+        $user = $repository->getOneRandomUser();
+
         return $this->render('security/login.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
+            'user' => $user,
         ]);
     }
 
@@ -79,6 +90,32 @@ class SecurityController extends AbstractController
         return $this->render('security/register.html.twig', [
             'form' => $form,
             'bestUsers' => $bestUsers,
+        ]);
+    }
+
+    #[Route('/account/password-update', name: 'app_password_update')]
+    #[IsGranted('ROLE_USER')]
+    public function updatePassword(Request $request, PasswordUpdater $passwordUpdater): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $passwordUpdate = new PasswordUpdate();
+        $form = $this->createForm(PasswordUpdateType::class, $passwordUpdate);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if (!$passwordUpdater->isCurrentPassword($user, $passwordUpdate->getOldPassword())) {
+                $form->get('oldPassword')->addError(new FormError('The password you entered is not your current password!'));
+            } else {
+                $passwordUpdater->updatePassword($user, $passwordUpdate->getNewPassword());
+                $this->addFlash('success', 'Your password has been updated successfully.');
+
+                return $this->redirectToRoute('app_home');
+            }
+        }
+
+        return $this->render('security/password.html.twig', [
+            'form' => $form->createView(),
         ]);
     }
 }
