@@ -78,3 +78,22 @@ lint: ## Run Symfony's linter
 	$(PHP) bin/console lint:twig templates
 	$(PHP) bin/console lint:yaml config
 	$(PHP) bin/console lint:container
+
+clean: ## Supprimer toutes les branches locales et distantes sauf main, develop
+	@echo "$(YELLOW)Branches locales à supprimer :$(NO_COLOR)"
+	@git branch | grep -vE '^\*|main|develop' || echo "  (aucune)"
+	@echo "$(YELLOW)Branches distantes à supprimer :$(NO_COLOR)"
+	@git fetch --prune -q && git branch -r | grep -vE 'origin/(main|develop)' | sed 's/origin\///' || echo "  (aucune)"
+	@echo ""
+	@printf "$(RED)⚠️  Confirmer la suppression ? [y/N] $(NO_COLOR)" && read ans && [ "$${ans}" = "y" ] || { echo "$(YELLOW)Annulé.$(NO_COLOR)"; exit 1; }
+
+	@echo "$(YELLOW)Nettoyage des références distantes obsolètes...$(NO_COLOR)"
+	@git fetch --prune
+
+	@echo "$(YELLOW)Suppression des branches locales...$(NO_COLOR)"
+	@git branch | grep -vE '^\*|main|develop' | xargs -r git branch -D || true
+
+	@echo "$(YELLOW)Suppression des branches distantes...$(NO_COLOR)"
+	@git branch -r | grep -vE 'origin/(main|develop)' | sed 's/origin\///' | xargs -r -I {} git push origin --delete {} || true
+
+	@echo "$(GREEN)Nettoyage des branches terminé$(NO_COLOR)"
